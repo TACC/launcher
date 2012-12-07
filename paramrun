@@ -1,0 +1,105 @@
+#!/bin/sh
+
+echo "TACC: Starting up job $JOB_ID"
+
+# Get the PE hostfile, number of slots and wayness from the environment
+pe_hostfile=$PE_HOSTFILE
+pe_slots=$NSLOTS
+pe_ppn=`echo $PE | sed -e 's/way//g;'`
+
+if [ x"$TACC_LAUNCHER_PPN" == "x" ]; then
+  export TACC_LAUNCHER_PPN=$pe_ppn
+fi
+
+srq_size=2048
+default_time_out=23
+  
+# Find out which MPI stack we're using
+MODE=`/sge_common/default/pe_scripts/getmode.sh`
+
+# Set our files and directories
+home_sge_dir="$HOME/.sge"
+if [ ! -d $home_sge_dir ]; then
+  mkdir -p $home_sge_dir
+fi
+hostfile_tacc=`mktemp $home_sge_dir/job.$JOB_ID.hostlist.XXXXXXXX`
+nslotsfile_tacc=`mktemp $home_sge_dir/job.$JOB_ID.info.XXXXXXXX`
+
+if [ -f $nslotsfile_tacc ]; then
+  rm $nslotsfile_tacc
+fi
+
+if [ -f $hostfile_tacc ]; then
+  rm $hostfile_tacc
+fi
+
+for i in `cat $pe_hostfile | cut -f 1 -d ' '`; do
+  echo $i >> $hostfile_tacc
+done
+np=`cat $hostfile_tacc | wc -l`
+
+echo "TACC: Setup complete. Running job script."
+
+if [ x"$MY_NSLOTS" == "x" ]; then
+  if [ -f $nslotsfile_tacc ]; then
+    MY_NSLOTS=`cat $nslotsfile_tacc`
+  else
+    MY_NSLOTS=$NSLOTS
+  fi
+fi
+
+#------------------
+# Scheduling setup
+#------------------
+if [ $TACC_LAUNCHER_SCHED == "dynamic" ]; then
+  #Start The Count
+  $TACC_LAUNCHER_DIR/tskserver `wc -l $WORKDIR/$CONTROL_FILE` 9471 2>/dev/null &
+  export TACC_LAUNCHER_DYN_COUNT="$HOSTNAME 9471"
+  if [ $TACC_LAUNCHER_NPHI -ne "0" ]; then
+    #Start another server for the Intel Xeon Phi cards
+    $TACC_LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` 9472 2>/dev/null &
+    export TACC_LAUNCHER_PHI_DYN_COUNT="$HOSTNAME 9472"
+  fi
+fi
+
+#------------------------------
+# Let's finally launch the job
+#------------------------------
+
+echo "TACC: starting parallel tasks..."
+
+i=0
+for host in `cat $hostfile_tacc`
+do
+  ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` TACC_LAUNCHER_NHOSTS=$np TACC_LAUNCHER_HOST_ID=$i $*" &
+  i=`expr $i + 1`
+done
+wait
+
+res=$?
+
+if [ $res -ne 0 ]; then
+  echo "TACC: Parametric job exited with code: $res"
+fi
+
+#-----------------------
+# Job tear-down/cleanup
+#-----------------------
+
+echo "TACC: Shutting down parallel environment."
+
+if [ x"$TACC_KEEP_FILES" != "x" ]; then
+    if [ -f $nslotsfile_tacc ]; then
+	rm $nslotsfile_tacc
+    fi
+    if [ -f $hostfile_tacc ]; then
+	rm $hostfile_tacc
+    fi
+fi
+
+echo "TACC: Shutdown complete. Exiting." 
+
+exit $res
+
+
+

@@ -57,6 +57,9 @@ if [ $TACC_LAUNCHER_SCHED == "interleaved" ]; then
   export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_TSK_ID + 1`
 elif [ $TACC_LAUNCHER_SCHED == "block" ]; then
   blocks=`expr $TACC_LAUNCHER_NJOBS / $TACC_LAUNCHER_NPROCS`
+  if [ `expr $blocks \* $TACC_LAUNCHER_NPROCS` -lt $TACC_LAUNCHER_NJOBS ]; then
+    blocks=`expr $blocks + 1`
+  fi
   export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_TSK_ID \* $blocks + 1`
   nextblock=`expr \( $TACC_LAUNCHER_TSK_ID + 1 \) \* $blocks + 1`
 else
@@ -68,7 +71,7 @@ COMPLETE="false"
 
 while [ $COMPLETE == "false" ]; do
   export CMD=`grep -m $TACC_LAUNCHER_JID . $INFILE | tail -n 1`
-  echo "TACC Launcher -> Iniating task $TACC_LAUNCHER_JID on `hostname` ($CMD)"
+  echo "TACC Launcher -> Initiating task $TACC_LAUNCHER_JID on `hostname` ($CMD)"
   eval $CMD
   if [ $TACC_LAUNCHER_SCHED == "interleaved" ]; then
     export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_JID + $TACC_LAUNCHER_NPROCS`

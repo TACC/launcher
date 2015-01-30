@@ -87,7 +87,6 @@ Job Submission:
 
 	SGE:   launcher.sge
         SLURM: launcher.slurm
-        LSF:   launcher.lsf
 
 --
 Last Update: 11/27/2012

@@ -12,9 +12,9 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
-TACC_LAUNCHER_TSK_ID=$1
+LAUNCHER_TSK_ID=$1
 
-if [ "$TACC_LAUNCHER_ON_PHI" == "1" ];then
+if [ "$LAUNCHER_ON_PHI" == "1" ];then
   cd $5
   export INFILE="$6"
 else
@@ -22,26 +22,26 @@ else
   export INFILE="$3"
 fi
 
-export TACC_LAUNCHER_NJOBS=`cat $INFILE | wc -l`
+export LAUNCHER_NJOBS=`cat $INFILE | wc -l`
 
-if [ "$TACC_LAUNCHER_ON_PHI" == "1" ];then
-  TACC_LAUNCHER_DYN_SRV="$TACC_LAUNCHER_PHI_DYN_COUNT"
+if [ "$LAUNCHER_ON_PHI" == "1" ];then
+  LAUNCHER_DYN_SRV="$LAUNCHER_PHI_DYN_COUNT"
 else
-  TACC_LAUNCHER_DYN_SRV="$TACC_LAUNCHER_DYN_COUNT"
+  LAUNCHER_DYN_SRV="$LAUNCHER_DYN_COUNT"
 fi
 
-if [ "$TACC_LAUNCHER_TSK_ID" == "0" ];then
+if [ "$LAUNCHER_TSK_ID" == "0" ];then
 
-  if [ "$TACC_LAUNCHER_PN_PHI" == "1" ];then
+  if [ "$LAUNCHER_PN_PHI" == "1" ];then
     echo "--------------------------------------------------"
-    echo "TACC Launcher (on Intel Xeon Phi) -> $TACC_LAUNCHER_NPROCS processors allocated."
-    echo "TACC Launcher (on Intel Xeon Phi) -> $TACC_LAUNCHER_NJOBS total tasks to complete."
+    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NPROCS processors allocated."
+    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NJOBS total tasks to complete."
     echo "--------------------------------------------------"
     echo " "
   else
     echo "--------------------------------------------------"
-    echo "TACC Launcher -> $TACC_LAUNCHER_NPROCS processors allocated."
-    echo "TACC Launcher -> $TACC_LAUNCHER_NJOBS total tasks to complete."
+    echo "Launcher -> $LAUNCHER_NPROCS processors allocated."
+    echo "Launcher -> $LAUNCHER_NJOBS total tasks to complete."
     echo "--------------------------------------------------"
     echo " "
   fi
@@ -52,40 +52,40 @@ fi
 #---------------------------------
 # Setup initial JID for each task
 #---------------------------------
-if [ $TACC_LAUNCHER_SCHED == "interleaved" ]; then
+if [ $LAUNCHER_SCHED == "interleaved" ]; then
   # Setup stride for assigning serial tasks
-  export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_TSK_ID + 1`
-elif [ $TACC_LAUNCHER_SCHED == "block" ]; then
-  blocks=`expr $TACC_LAUNCHER_NJOBS / $TACC_LAUNCHER_NPROCS`
-  if [ `expr $blocks \* $TACC_LAUNCHER_NPROCS` -lt $TACC_LAUNCHER_NJOBS ]; then
+  export LAUNCHER_JID=`expr $LAUNCHER_TSK_ID + 1`
+elif [ $LAUNCHER_SCHED == "block" ]; then
+  blocks=`expr $LAUNCHER_NJOBS / $LAUNCHER_NPROCS`
+  if [ `expr $blocks \* $LAUNCHER_NPROCS` -lt $LAUNCHER_NJOBS ]; then
     blocks=`expr $blocks + 1`
   fi
-  export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_TSK_ID \* $blocks + 1`
-  nextblock=`expr \( $TACC_LAUNCHER_TSK_ID + 1 \) \* $blocks + 1`
+  export LAUNCHER_JID=`expr $LAUNCHER_TSK_ID \* $blocks + 1`
+  nextblock=`expr \( $LAUNCHER_TSK_ID + 1 \) \* $blocks + 1`
 else
   # Grab the JID to run from The Count
-  export TACC_LAUNCHER_JID=`telnet $TACC_LAUNCHER_DYN_SRV 2>/dev/null | grep -v -e "^Connected" -e "Trying" -e "Escape"`
+  export LAUNCHER_JID=`telnet $LAUNCHER_DYN_SRV 2>/dev/null | grep -v -e "^Connected" -e "Trying" -e "Escape"`
 fi 
 
 COMPLETE="false"
 
 while [ $COMPLETE == "false" ]; do
-  export CMD=`grep -m $TACC_LAUNCHER_JID . $INFILE | tail -n 1`
-  echo "TACC Launcher -> Initiating task $TACC_LAUNCHER_JID on `hostname` ($CMD)"
+  export CMD=`grep -m $LAUNCHER_JID . $INFILE | tail -n 1`
+  echo "TACC Launcher -> Initiating task $LAUNCHER_JID on `hostname` ($CMD)"
   eval $CMD
-  if [ $TACC_LAUNCHER_SCHED == "interleaved" ]; then
-    export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_JID + $TACC_LAUNCHER_NPROCS`
-    if [ $TACC_LAUNCHER_JID -gt $TACC_LAUNCHER_NJOBS ]; then
+  if [ $LAUNCHER_SCHED == "interleaved" ]; then
+    export LAUNCHER_JID=`expr $LAUNCHER_JID + $LAUNCHER_NPROCS`
+    if [ $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]; then
       COMPLETE="true"
     fi
-  elif [ $TACC_LAUNCHER_SCHED == "block" ]; then
-    export TACC_LAUNCHER_JID=`expr $TACC_LAUNCHER_JID + 1`
-    if [ $TACC_LAUNCHER_JID -ge $nextblock ]; then
+  elif [ $LAUNCHER_SCHED == "block" ]; then
+    export LAUNCHER_JID=`expr $LAUNCHER_JID + 1`
+    if [ $LAUNCHER_JID -ge $nextblock ]; then
       COMPLETE="true"
     fi
   else
-    export TACC_LAUNCHER_JID=`telnet $TACC_LAUNCHER_DYN_SRV 2>/dev/null | grep -v -e "^Connected" -e "Trying" -e "Escape"`
-    if [ $TACC_LAUNCHER_JID == "" ]; then
+    export LAUNCHER_JID=`telnet $LAUNCHER_DYN_SRV 2>/dev/null | grep -v -e "^Connected" -e "Trying" -e "Escape"`
+    if [ $LAUNCHER_JID == "" ]; then
       COMPLETE="true"
     fi
   fi

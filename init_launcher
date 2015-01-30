@@ -9,22 +9,22 @@
 #------------------------------------------------
 
 #Calculate the number of processor based on number of hosts and wayness of the job
-export TACC_LAUNCHER_NPROCS=$(($TACC_LAUNCHER_NHOSTS * $TACC_LAUNCHER_PPN))
+export LAUNCHER_NPROCS=$(($LAUNCHER_NHOSTS * $LAUNCHER_PPN))
 
-for i in `seq 0 $(($TACC_LAUNCHER_PPN - 1))`
+for i in `seq 0 $(($LAUNCHER_PPN - 1))`
 do
   #Start the launcher script for every process to be spawned on this host and give it a unique task id
-  $TACC_LAUNCHER_DIR/launcher $(($TACC_LAUNCHER_PPN * $TACC_LAUNCHER_HOST_ID + $i)) $* &
+  $LAUNCHER_DIR/launcher $(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $* &
 done
 
-if [ "x$TACC_LAUNCHER_NPHI" -ne "x" ]
+if [ "x$LAUNCHER_NPHI" -ne "x" ]
 then
   #Start the launcher on the Intel Xeon Phi cards in this box
-  for j in `seq 0 $(($TACC_LAUNCHER_NPHI - 1))`
+  for j in `seq 0 $(($LAUNCHER_NPHI - 1))`
   do
     ssh mic$j "env `/sge_common/default/pe_scripts/build_env.pl` 
-               TACC_LAUNCHER_PHI_ID=$(($TACC_LAUNCHER_HOST_ID * $TACC_LAUNCHER_NPHI + $j)) 
-               $TACC_LAUNCHER_DIR/init_launcher_phi $*" &    
+               LAUNCHER_PHI_ID=$(($LAUNCHER_HOST_ID * $LAUNCHER_NPHI + $j)) 
+               $LAUNCHER_DIR/init_launcher_phi $*" &    
   done
 fi
 

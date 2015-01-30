@@ -9,11 +9,11 @@
 #------------------------------------------------
 
 #Calculate the number of processor based on number of hosts and wayness of the job
-export TACC_LAUNCHER_NPROCS=$(($TACC_LAUNCHER_NPHI * $TACC_LAUNCHER_PHI_PPN))
-export TACC_LAUNCHER_ON_PHI=1
+export LAUNCHER_NPROCS=$(($LAUNCHER_NPHI * $LAUNCHER_PHI_PPN))
+export LAUNCHER_ON_PHI=1
 
-for i in `seq 0 $(($TACC_LAUNCHER_PHI_PPN - 1))`
+for i in `seq 0 $(($LAUNCHER_PHI_PPN - 1))`
 do
   #Start the launcher script for every process to be spawned on this host and give it a unique task id
-  $TACC_LAUNCHER_DIR/launcher $(($TACC_LAUNCHER_PHI_PPN * $TACC_LAUNCHER_PHI_ID + $i)) $* &
+  $LAUNCHER_DIR/launcher $(($LAUNCHER_PHI_PPN * $LAUNCHER_PHI_ID + $i)) $* &
 done

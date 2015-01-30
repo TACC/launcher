@@ -33,26 +33,26 @@
 #	   NOTE: The env variable $JOB_ID contains the job id. 
 #
 #module load launcher
-export EXECUTABLE=$TACC_LAUNCHER_DIR/init_launcher
+export EXECUTABLE=$LAUNCHER_DIR/init_launcher
 export CONTROL_FILE=paramlist
 export WORKDIR=.
-export TACC_LAUNCHER_SCHED=block
+export LAUNCHER_SCHED=block
 # 
 # Variable description:
 #
-#  EXECUTABLE          = full path to the job launcher executable
-#  CONTROL_FILE        = text input file which specifies
-#                        executable for each process
-#                        (should be located in WORKDIR)
-#  WORKDIR             = location of working directory
-#  TACC_LAUNCHER_SCHED = scheduling method for lines in CONTROL_FILE
-#                        options (k=process, n=num. lines, p=num. procs):
-#                          - interleaved (default): 
-#                              process k executes every k+nth line
-#                          - block:
-#                              process k executes lines [ k(n/p)+1 , (k+1)(n/p) ]
-#                          - dynamic:
-#                              process k executes first available unclaimed line
+#  EXECUTABLE     = full path to the job launcher executable
+#  CONTROL_FILE   = text input file which specifies
+#                   executable for each process
+#                   (should be located in WORKDIR)
+#  WORKDIR        = location of working directory
+#  LAUNCHER_SCHED = scheduling method for lines in CONTROL_FILE
+#                   options (k=process, n=num. lines, p=num. procs):
+#                     - interleaved (default): 
+#                         process k executes every k+nth line
+#                     - block:
+#                         process k executes lines [ k(n/p)+1 , (k+1)(n/p) ]
+#                     - dynamic:
+#                         process k executes first available unclaimed line
 #
 #      <------ End Setup Parameters ------>
 #--------------------------------------------------------
@@ -94,7 +94,7 @@ fi
 cd $WORKDIR/
 echo " WORKING DIR:   $WORKDIR/"
 
-$TACC_LAUNCHER_DIR/paramrun $EXECUTABLE $CONTROL_FILE `hostname`
+$LAUNCHER_DIR/paramrun $EXECUTABLE $CONTROL_FILE `hostname`
 
 echo " "
 echo " Parameteric Job Complete"

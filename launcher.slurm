@@ -33,33 +33,33 @@
 #	   NOTE: The env variable $JOB_ID contains the job id. 
 #
 #module load launcher
-export EXECUTABLE=$TACC_LAUNCHER_DIR/init_launcher
+export EXECUTABLE=$LAUNCHER_DIR/init_launcher
 export CONTROL_FILE=paramlist
 export PHI_CONTROL_FILE=phiparamlist
 export WORKDIR=.
 export PHI_WORKDIR=.
-export TACC_LAUNCHER_SCHED=block
+export LAUNCHER_SCHED=interleaved
 # 
 # Variable description:
 #
-#  EXECUTABLE          = full path to the job launcher executable
-#  CONTROL_FILE        = text input file which specifies
-#                        executable for each process
-#                        (should be located in WORKDIR)
-#  PHI_CONTROL_FILE    = text input file which specifies executable
-#                        for each process to be run on Intel Xeon Phi
-#                        (should be located in PHI_WORKDIR)
-#  WORKDIR             = location of working directory
-#  PHI_WORKDIR         = location of working directory for Intel Xeon Phi jobs
-#  TACC_LAUNCHER_SCHED = scheduling method for lines in CONTROL_FILE
-#                        options (k=process, n=num. lines, p=num. procs):
-#                          - interleaved (default): 
-#                              process k executes every k+nth line
-#                          - block:
-#                              process k executes lines [ k(n/p)+1 , (k+1)(n/p) ]
-#                          - dynamic:
-#                              process k executes first available unclaimed line
-#
+#  EXECUTABLE       = full path to the job launcher executable
+#  CONTROL_FILE     = text input file which specifies
+#                     executable for each process
+#                     (should be located in WORKDIR)
+#  PHI_CONTROL_FILE = text input file which specifies executable
+#                     for each process to be run on Intel Xeon Phi
+#                     (should be located in PHI_WORKDIR)
+#  WORKDIR          = location of working directory
+#  PHI_WORKDIR      = location of working directory for Intel Xeon Phi jobs
+#  LAUNCHER_SCHED   = scheduling method for lines in CONTROL_FILE
+#                     options (k=process, n=num. lines, p=num. procs):
+#                       - interleaved (default): 
+#                           process k executes every k+nth line
+#                       - block:
+#                           process k executes lines [ k(n/p)+1 , (k+1)(n/p) ]
+#                       - dynamic:
+#                           process k executes first available unclaimed line
+
 #      <------ End Setup Parameters ------>
 #--------------------------------------------------------
 #--------------------------------------------------------
@@ -100,7 +100,7 @@ fi
 cd $WORKDIR/
 echo " WORKING DIR:   $WORKDIR/"
 
-$TACC_LAUNCHER_DIR/paramrun $EXECUTABLE $WORKDIR $CONTROL_FILE `hostname` $PHI_WORKDIR $PHI_CONTROL_FILE
+$LAUNCHER_DIR/paramrun $EXECUTABLE $WORKDIR $CONTROL_FILE `hostname` $PHI_WORKDIR $PHI_CONTROL_FILE
 
 echo " "
 echo " Parameteric Job Complete"

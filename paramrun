@@ -55,7 +55,7 @@ if [ $LAUNCHER_SCHED == "dynamic" ]; then
   #Start The Count
   $LAUNCHER_DIR/tskserver `wc -l $WORKDIR/$CONTROL_FILE` 9471 2>/dev/null &
   export LAUNCHER_DYN_COUNT="$HOSTNAME 9471"
-  if [ $LAUNCHER_NPHI -ne "0" ]; then
+  if [ -n $LAUNCHER_NPHI -a $LAUNCHER_NPHI -ne "0" ]; then
     #Start another server for the Intel Xeon Phi cards
     $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` 9472 2>/dev/null &
     export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME 9472"

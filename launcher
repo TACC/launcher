@@ -32,7 +32,7 @@ fi
 
 if [ "$LAUNCHER_TSK_ID" == "0" ];then
 
-  if [ "$LAUNCHER_PN_PHI" == "1" ];then
+  if [ "$LAUNCHER_ON_PHI" == "1" ];then
     echo "--------------------------------------------------"
     echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NPROCS processors allocated."
     echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NJOBS total tasks to complete."

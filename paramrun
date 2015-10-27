@@ -1,62 +1,124 @@
 #!/bin/sh
 
-echo "TACC: Starting up job $JOB_ID"
+#Step 0: Determine if resource manager integration is enabled
+if [ -n $LAUNCHER_RES_MAN ]
+then
+  if [ $LAUNCHER_RES_MAN == "SLURM" ]
+  then
+    #SLURM Integration: Let's set all appropriate variables
+    echo "Launcher: Starting SLURM-integrated job $SLURM_JOB_ID."
+    
+    #Get the number of hosts (LAUNCHER_NHOSTS)
+    if [ -z $LAUNCHER_NHOSTS ]
+    then
+      export LAUNCHER_NHOSTS=$SLURM_NNODES
+    fi
+    
+    #Setup the hostfile (Cannot be overridden when scheduler integration is enabled)
+    LAUNCHER_HOSTFILE=`mktemp $HOME/.launcher.${SLURM_JOB_ID}.hostfile.XXXXXXXX`
+    scontrol show hostname $SLURM_NODELIST > $LAUNCHER_HOSTFILE
 
-# Get the PE hostfile, number of slots and wayness from the environment
-pe_hostfile=$PE_HOSTFILE
-pe_slots=$NSLOTS
-pe_ppn=`echo $PE | sed -e 's/way//g;'`
+    #Set the number of processes per node (LAUNCHER_PPN)
+    if [ -z $LAUNCHER_PPN ]
+    then
+      export LAUNCHER_PPN=`echo $SLURM_TASKS_PER_NODE | awk -F '(' '{print $1}'`
+    fi
 
-if [ x"$LAUNCHER_PPN" == "x" ]; then
-  export LAUNCHER_PPN=$pe_ppn
-fi
+    #Set the number of total processes (LAUNCHER_NHOSTS * LAUNCHER_PPN)
+    export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS * $LAUNCHER_PPN`
 
-srq_size=2048
-default_time_out=23
-  
-# Find out which MPI stack we're using
-MODE=`/sge_common/default/pe_scripts/getmode.sh`
+  elif [ $LAUNCHER_RES_MAN == "SGE" ]
+  then
+    #SGE Integration: Let's set all appropriate variables
+    echo "Launcher: Starting SGE-integrated job $JOB_ID."
 
-# Set our files and directories
-home_sge_dir="$HOME/.sge"
-if [ ! -d $home_sge_dir ]; then
-  mkdir -p $home_sge_dir
-fi
-hostfile_tacc=`mktemp $home_sge_dir/job.$JOB_ID.hostlist.XXXXXXXX`
-nslotsfile_tacc=`mktemp $home_sge_dir/job.$JOB_ID.info.XXXXXXXX`
+    #Get the number of hosts (LAUNCHER_NHOSTS)
+    if [ -z $LAUNCHER_NHOSTS ]
+    then
+      export LAUNCHER_NHOSTS=`wc -l $PE_HOSTFILE`
+    fi
+    
+    #Setup the hostfile (Cannot be overridden when scheduler integration is enabled)
+    LAUNCHER_HOSTFILE=`mktemp $HOME/.launcher.${JOB_ID}.hostfile.XXXXXXXX`
+    cat $PE_HOSTFILE | cut -f 1 -d ' ' > $LAUNCHER_HOSTFILE
 
-if [ -f $nslotsfile_tacc ]; then
-  rm $nslotsfile_tacc
-fi
+    #Set the number of processes per node (LAUNCHER_PPN)
+    if [ -z $LAUNCHER_PPN ]
+    then
+      export LAUNCHER_PPN=`echo $PE | sed -e 's/way//g;'`
+    fi
 
-if [ -f $hostfile_tacc ]; then
-  rm $hostfile_tacc
-fi
+    #Set the number of total processes (LAUNCHER_NHOSTS * LAUNCHER_PPN)
+    export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS * $LAUNCHER_PPN`
 
-for i in `cat $pe_hostfile | cut -f 1 -d ' '`; do
-  echo $i >> $hostfile_tacc
-done
-np=`cat $hostfile_tacc | wc -l`
-
-echo "TACC: Setup complete. Running job script."
-
-if [ x"$MY_NSLOTS" == "x" ]; then
-  if [ -f $nslotsfile_tacc ]; then
-    MY_NSLOTS=`cat $nslotsfile_tacc`
   else
-    MY_NSLOTS=$NSLOTS
+    #Unrecognized scheduler. Print an error message
+    echo "WARNING: $LAUNCHER_RES_MAN is not a recognized resource manager." >&2
+    echo "         Available options are: SLURM, SGE" >&2
+    echo "         Defaulting to no integration." >&2
   fi
+else
+  echo "Launcher: Starting manual job (no resource manager integration)."
 fi
 
-#------------------
-# Scheduling setup
-#------------------
-if [ $LAUNCHER_SCHED == "dynamic" ]; then
-  #Start The Count
-  $LAUNCHER_DIR/tskserver `wc -l $WORKDIR/$CONTROL_FILE` 9471 2>/dev/null &
+#Step 1: Ensure that LAUNCHER_HOSTFILE is set and valid
+if [ -n $LAUNCHER_HOSTFILE ]
+then
+  if [ ! -f $LAUNCHER_HOSTFILE ]
+  then
+    echo "ERROR: Hostfile ($LAUNCHER_HOSTFILE) not found." >&2
+    exit
+  fi
+else
+  echo "ERROR: \$LAUNCHER_HOSTFILE is not set." >&2
+  exit
+fi
+
+#Step 2: Ensure that necessary variables are set
+if [ -z $LAUNCHER_PPN ]
+  echo "ERROR: LAUNCHER_PPN is not set." >&2
+  exit
+fi
+
+if [ -z $LAUNCHER_NHOSTS ]
+  echo "ERROR: LAUNCHER_NHOSTS is not set." >&2
+  exit
+fi
+
+if [ -z $LAUNCHER_NPROCS ]
+  echo "ERROR: LAUNCHER_NPROCS is not set." >&2
+  exit
+fi
+
+#Step 3: Ensure that CONTROL_FILE exists
+if [ -n $LAUNCHER_JOB_FILE ]
+then
+  if [ -f $LAUNCHER_JOB_FILE ]
+  then
+    export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE`
+  else
+    echo "ERROR: LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found." >&2
+  fi
+else
+  echo "ERROR: LAUNCHER_JOB_FILE not set." >&2
+fi
+
+#Step 4: Setup Xeon Phi support
+if [ -n $LAUNCHER_NPHI -a $LAUNCHER_NPHI -ne "0"]
+then
+  echo "Launcher: Setting up Intel Xeon Phi support."
+  LAUNCHER_USE_PHI=1
+else
+  LAUNCHER_USE_PHI=0
+fi
+
+#Step 5: Scheduling setup
+if [ -n $LAUNCHER_SCHED -a $LAUNCHER_SCHED == "dynamic" ]; then
+  #Start tskserver
+  $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS 9471 2>/dev/null &
   export LAUNCHER_DYN_COUNT="$HOSTNAME 9471"
-  if [ $LAUNCHER_NPHI -ne "0" ]; then
-    #Start another server for the Intel Xeon Phi cards
+  if [ $LAUNCHER_USE_PHI -ne "0" ]; then
+    #Start another tskserver for the Intel Xeon Phi cards
     $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` 9472 2>/dev/null &
     export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME 9472"
   fi
@@ -66,10 +128,24 @@ fi
 # Let's finally launch the job
 #------------------------------
 
-echo "Launcher: starting parallel tasks..."
+echo "Launcher: Setup complete."
+echo "   Number of hosts:    $LAUNCHER_NHOSTS"
+echo "   Processes per host: $LAUNCHER_PPN"
+echo "   Total processes:    $LAUNCHER_NPROCS"
+echo "   Total jobs:         $LAUNCHER_NJOBS"
+echo "   Scheduling method:  $LAUNCHER_SCHED"
+echo
+if [ $LAUNCHER_USE_PHI -eq 1 ]
+then
+  echo "--- Xeon Phi Support Enabled ---"
+  echo "   Cards per host:     $LAUNCHER_NPHI"
+  echo "   Processes per card: $LAUNCHER_PHI_PPN"
+  echo
+fi
+echo "Launcher: Starting parallel tasks..."
 
 i=0
-for host in `cat $hostfile_tacc`
+for host in `cat $LAUNCHER_HOSTFILE`
 do
   ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $*" &
   i=`expr $i + 1`

@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------
-Parametric Job Launcher: a simple utility for executing multiple 
-                         independent applications simultaneously. 
+Launcher: a simple utility for submitting multiple 
+          serial applications simultaneously. 
 -------------------------------------------------------------------------
 
 To use:

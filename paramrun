@@ -1,119 +1,109 @@
 #!/bin/sh
 
-#Step 0: Determine if resource manager integration is enabled
-if [ -n $LAUNCHER_RES_MAN ]
+
+
+
+if [ -z $LAUNCHER_DIR ]
 then
-  if [ $LAUNCHER_RES_MAN == "SLURM" ]
+  echo "ERROR: Launcher base directory LAUNCHER_DIR not set. Exiting." >&2
+  exit
+fi
+
+#Step 0: Determine if resource manager integration is enabled
+if [ -z $LAUNCHER_PLUGIN_DIR ]
+then
+  echo "WARNING: LAUNCHER_PLUGIN_DIR not set. Defaulting to $LAUNCHER_DIR/plugins." >&2
+  LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
+fi
+
+if [ -z $LAUNCHER_RMI ]
+then
+  echo "Launcher: Starting without resource manager integration."
+else
+  if [ -f $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.plugin ]
   then
-    #SLURM Integration: Let's set all appropriate variables
-    echo "Launcher: Starting SLURM-integrated job $SLURM_JOB_ID."
-    
-    #Get the number of hosts (LAUNCHER_NHOSTS)
-    if [ -z $LAUNCHER_NHOSTS ]
-    then
-      export LAUNCHER_NHOSTS=$SLURM_NNODES
-    fi
-    
-    #Setup the hostfile (Cannot be overridden when scheduler integration is enabled)
-    LAUNCHER_HOSTFILE=`mktemp $HOME/.launcher.${SLURM_JOB_ID}.hostfile.XXXXXXXX`
-    scontrol show hostname $SLURM_NODELIST > $LAUNCHER_HOSTFILE
-
-    #Set the number of processes per node (LAUNCHER_PPN)
-    if [ -z $LAUNCHER_PPN ]
-    then
-      export LAUNCHER_PPN=`echo $SLURM_TASKS_PER_NODE | awk -F '(' '{print $1}'`
-    fi
-
-    #Set the number of total processes (LAUNCHER_NHOSTS * LAUNCHER_PPN)
-    export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS * $LAUNCHER_PPN`
-
-  elif [ $LAUNCHER_RES_MAN == "SGE" ]
-  then
-    #SGE Integration: Let's set all appropriate variables
-    echo "Launcher: Starting SGE-integrated job $JOB_ID."
-
-    #Get the number of hosts (LAUNCHER_NHOSTS)
-    if [ -z $LAUNCHER_NHOSTS ]
-    then
-      export LAUNCHER_NHOSTS=`wc -l $PE_HOSTFILE`
-    fi
-    
-    #Setup the hostfile (Cannot be overridden when scheduler integration is enabled)
-    LAUNCHER_HOSTFILE=`mktemp $HOME/.launcher.${JOB_ID}.hostfile.XXXXXXXX`
-    cat $PE_HOSTFILE | cut -f 1 -d ' ' > $LAUNCHER_HOSTFILE
-
-    #Set the number of processes per node (LAUNCHER_PPN)
-    if [ -z $LAUNCHER_PPN ]
-    then
-      export LAUNCHER_PPN=`echo $PE | sed -e 's/way//g;'`
-    fi
-
-    #Set the number of total processes (LAUNCHER_NHOSTS * LAUNCHER_PPN)
-    export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS * $LAUNCHER_PPN`
-
+    source $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.plugin
   else
-    #Unrecognized scheduler. Print an error message
-    echo "WARNING: $LAUNCHER_RES_MAN is not a recognized resource manager." >&2
-    echo "         Available options are: SLURM, SGE" >&2
+    echo "WARNING: Resource Manager Integration plugin file $LAUNCHER_RMI.rmi no found." >&2
+    echo "         Available options:" >&2
+    for rmi in `ls $LAUNCHER_PLUGIN_DIR/*.rmi 2>/dev/null` 
+    do
+      echo "           `basename $rmi .rmi`" >&2
+    done
     echo "         Defaulting to no integration." >&2
   fi
-else
-  echo "Launcher: Starting manual job (no resource manager integration)."
 fi
 
 #Step 1: Ensure that LAUNCHER_HOSTFILE is set and valid
-if [ -n $LAUNCHER_HOSTFILE ]
+if [ -z $LAUNCHER_HOSTFILE ]
 then
+  echo "WARNING: LAUNCHER_HOSTFILE is not set. Defaulting to localhost." >&2
+  LAUNCHER_LOCALHOST=1
+  export LAUNCHER_NHOSTS=1
+else
   if [ ! -f $LAUNCHER_HOSTFILE ]
   then
     echo "ERROR: Hostfile ($LAUNCHER_HOSTFILE) not found." >&2
     exit
   fi
-else
-  echo "ERROR: \$LAUNCHER_HOSTFILE is not set." >&2
-  exit
 fi
 
 #Step 2: Ensure that necessary variables are set
 if [ -z $LAUNCHER_PPN ]
-  echo "ERROR: LAUNCHER_PPN is not set." >&2
-  exit
+then
+  echo "WARNING: LAUNCHER_PPN is not set. Defaulting to 1." >&2
+  export LAUNCHER_PPN=1
 fi
 
 if [ -z $LAUNCHER_NHOSTS ]
-  echo "ERROR: LAUNCHER_NHOSTS is not set." >&2
-  exit
+then
+  echo "WARNING: LAUNCHER_NHOSTS is not set. Calculating from hostfile." >&2
+  export LAUNCHER_NHOSTS=`wc -l $LAUNCHER_HOSTFILE | awk '{print $1}'`
 fi
 
+export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS \* $LAUNCHER_PPN`
+
 if [ -z $LAUNCHER_NPROCS ]
+then
   echo "ERROR: LAUNCHER_NPROCS is not set." >&2
   exit
 fi
 
-#Step 3: Ensure that CONTROL_FILE exists
-if [ -n $LAUNCHER_JOB_FILE ]
+#Step 3: Ensure that LAUNCHER_JOB_FILE exists
+if [ -z $LAUNCHER_JOB_FILE ]
 then
+  echo "WARNING: LAUNCHER_JOB_FILE not set." >&2
+  exit
+else
   if [ -f $LAUNCHER_JOB_FILE ]
   then
-    export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE`
+    export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
   else
     echo "ERROR: LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found." >&2
   fi
-else
-  echo "ERROR: LAUNCHER_JOB_FILE not set." >&2
 fi
 
 #Step 4: Setup Xeon Phi support
-if [ -n $LAUNCHER_NPHI -a $LAUNCHER_NPHI -ne "0"]
+if [ "x$LAUNCHER_NPHI" == "x" -o "x$LAUNCHER_NPHI" == "x0" ]
 then
+  LAUNCHER_USE_PHI=0
+else
   echo "Launcher: Setting up Intel Xeon Phi support."
   LAUNCHER_USE_PHI=1
-else
-  LAUNCHER_USE_PHI=0
 fi
 
 #Step 5: Scheduling setup
-if [ -n $LAUNCHER_SCHED -a $LAUNCHER_SCHED == "dynamic" ]; then
+if [ "x$LAUNCHER_SCHED" == "x" ]
+then
+  if [ "x$LAUNCHER_LOCALHOST" == "x1" ]
+  then
+    export LAUNCHER_SCHED="interleaved"
+  else
+    export LAUNCHER_SCHED="dynamic"
+  fi
+fi
+
+if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   #Start tskserver
   $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS 9471 2>/dev/null &
   export LAUNCHER_DYN_COUNT="$HOSTNAME 9471"
@@ -145,12 +135,17 @@ fi
 echo "Launcher: Starting parallel tasks..."
 
 i=0
-for host in `cat $LAUNCHER_HOSTFILE`
-do
-  ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $*" &
-  i=`expr $i + 1`
-done
-wait
+if [ "x$LAUNCHER_LOCALHOST" == "x1" ]
+then
+  env LAUNCHER_HOST_ID=0 $LAUNCHER_DIR/init_launcher
+else
+  for host in `cat $LAUNCHER_HOSTFILE`
+  do
+    ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $*" &
+    i=`expr $i + 1`
+  done
+  wait
+fi
 
 res=$?
 

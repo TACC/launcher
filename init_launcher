@@ -17,7 +17,7 @@ do
   $LAUNCHER_DIR/launcher $(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $* &
 done
 
-if [ "x$LAUNCHER_NPHI" -ne "x" ]
+if [ ! "x$LAUNCHER_NPHI" == "x" ]
 then
   #Start the launcher on the Intel Xeon Phi cards in this box
   for j in `seq 0 $(($LAUNCHER_NPHI - 1))`

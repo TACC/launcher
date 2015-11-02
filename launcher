@@ -12,17 +12,21 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
-LAUNCHER_TSK_ID=$1
-
-if [ "$LAUNCHER_ON_PHI" == "1" ];then
-  cd $5
-  export INFILE="$6"
-else
-  cd $2
-  export INFILE="$3"
+if [ "x$LAUNCHER_JOB_FILE" == "x" ]
+then
+  if [ "$LAUNCHER_ON_PHI" == "1" ];then
+    cd $5
+    export LAUNCHER_JOB_FILE="$6"
+  else
+    cd $2
+    export LAUNCHER_JOB_FILE="$3"
+  fi
 fi
 
-export LAUNCHER_NJOBS=`cat $INFILE | wc -l`
+if [ "x$LAUNCHER_JNOBS" == "x" ]
+then
+  export LAUNCHER_NJOBS=`cat $LAUNCHER_JOB_FILE | wc -l`
+fi
 
 if [ "$LAUNCHER_ON_PHI" == "1" ];then
   LAUNCHER_DYN_SRV="$LAUNCHER_PHI_DYN_COUNT"
@@ -30,24 +34,24 @@ else
   LAUNCHER_DYN_SRV="$LAUNCHER_DYN_COUNT"
 fi
 
-if [ "$LAUNCHER_TSK_ID" == "0" ];then
+#if [ "$LAUNCHER_TSK_ID" == "0" ];then
 
-  if [ "$LAUNCHER_ON_PHI" == "1" ];then
-    echo "--------------------------------------------------"
-    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NPROCS processors allocated."
-    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NJOBS total tasks to complete."
-    echo "--------------------------------------------------"
-    echo " "
-  else
-    echo "--------------------------------------------------"
-    echo "Launcher -> $LAUNCHER_NPROCS processors allocated."
-    echo "Launcher -> $LAUNCHER_NJOBS total tasks to complete."
-    echo "--------------------------------------------------"
-    echo " "
-  fi
-else
-    sleep 0.5
-fi
+#  if [ "$LAUNCHER_ON_PHI" == "1" ];then
+#    echo "--------------------------------------------------"
+#    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NPROCS processors allocated."
+#    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NJOBS total tasks to complete."
+#    echo "--------------------------------------------------"
+#    echo " "
+#  else
+#    echo "--------------------------------------------------"
+#    echo "Launcher -> $LAUNCHER_NPROCS processors allocated."
+#    echo "Launcher -> $LAUNCHER_NJOBS total tasks to complete."
+#    echo "--------------------------------------------------"
+#    echo " "
+#  fi
+#else
+#    sleep 0.5
+#fi
 
 #---------------------------------
 # Setup initial JID for each task
@@ -70,9 +74,15 @@ fi
 COMPLETE="false"
 
 while [ $COMPLETE == "false" ]; do
-  export CMD=`grep -m $LAUNCHER_JID . $INFILE | tail -n 1`
-  echo "TACC Launcher -> Initiating task $LAUNCHER_JID on `hostname` ($CMD)"
+  export CMD=`grep -m $LAUNCHER_JID . $LAUNCHER_JOB_FILE | tail -n 1`
+
+  START_TIME=`date +"%s"`
+  echo "Launcher: Task $LAUNCHER_TSK_ID running job $LAUNCHER_JID on `hostname` ($CMD)"
   eval $CMD
+  END_TIME=`date +"%s"`
+  EXEC_TIME=`expr $END_TIME - $START_TIME`
+  echo "Launcher: Job $LAUNCHER_JID completed in $EXEC_TIME seconds."
+
   if [ $LAUNCHER_SCHED == "interleaved" ]; then
     export LAUNCHER_JID=`expr $LAUNCHER_JID + $LAUNCHER_NPROCS`
     if [ $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]; then
@@ -84,9 +94,28 @@ while [ $COMPLETE == "false" ]; do
       COMPLETE="true"
     fi
   else
-    export LAUNCHER_JID=`telnet $LAUNCHER_DYN_SRV 2>/dev/null | grep -v -e "^Connected" -e "Trying" -e "Escape"`
-    if [ $LAUNCHER_JID == "" ]; then
-      COMPLETE="true"
-    fi
+    RETRY=0
+    while [ $RETRY -lt 3 ]
+    do
+      export LAUNCHER_JID=`telnet $LAUNCHER_DYN_SRV 2>/dev/null | grep -v -e "^Connected" -e "Trying" -e "Escape"`
+      if [ "x$LAUNCHER_JID" == "x" ]
+      then
+        if [ $RETRY -lt 3 ]
+        then
+          echo "WARNING: No response from dynamic task server. Retrying..."
+          RETRY=`expr $RETRY + 1`
+        else
+          echo "ERROR: No response from dynamic task server after 3 retries. Exiting."
+          exit
+        fi
+      elif [ "$LAUNCHER_JID" == "Done" ]
+      then
+        RETRY=4
+        COMPLETE="true"
+      else
+        RETRY=4
+      fi
+    done
   fi
+
 done

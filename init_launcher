@@ -14,7 +14,7 @@ export LAUNCHER_NPROCS=$(($LAUNCHER_NHOSTS * $LAUNCHER_PPN))
 for i in `seq 0 $(($LAUNCHER_PPN - 1))`
 do
   #Start the launcher script for every process to be spawned on this host and give it a unique task id
-  $LAUNCHER_DIR/launcher $(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $* &
+  env LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
 done
 
 if [ ! "x$LAUNCHER_NPHI" == "x" ]

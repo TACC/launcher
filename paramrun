@@ -69,6 +69,13 @@ then
   exit
 fi
 
+#Backward Compatability with v2 and v1: Check for CONTROL_FILE
+if [ ! -z $CONTROL_FILE ]
+then
+  echo "NOTICE: CONTROL_FILE variable depricated. Use LAUNCHER_JOB_FILE in the future."
+  export LAUNCHER_JOB_FILE=$CONTROL_FILE
+fi
+
 #Step 3: Ensure that LAUNCHER_JOB_FILE exists
 if [ -z $LAUNCHER_JOB_FILE ]
 then
@@ -105,11 +112,34 @@ fi
 
 if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   #Start tskserver
-  $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS 9471 2>/dev/null &
+  RUNNING="false"
+  RETRY=0
+  while [ $RUNNING == "false" ]
+  do
+    $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME 9471 2>/dev/null &
+    LAUNCHER_DYN_PID=$!
+    sleep 1s
+    if ! ps -p $! >/dev/null 2>/dev/null
+    then
+      if [ $RETRY -ne 3 ]
+      then
+        echo "WARNING: Unable to start dynamic task service. Retrying..."
+        RETRY=`expr $RETRY + 1`
+        sleep 10s
+      else 
+        echo "ERROR: Unable to start dynamic task service. Shutting down."
+        exit
+      fi
+    else
+      RUNNING="true"
+    fi
+  done
+
   export LAUNCHER_DYN_COUNT="$HOSTNAME 9471"
+
   if [ $LAUNCHER_USE_PHI -ne "0" ]; then
     #Start another tskserver for the Intel Xeon Phi cards
-    $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` 9472 2>/dev/null &
+    $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
     export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME 9472"
   fi
 fi
@@ -119,11 +149,14 @@ fi
 #------------------------------
 
 echo "Launcher: Setup complete."
+echo
+echo "------------- SUMMARY ---------------"
 echo "   Number of hosts:    $LAUNCHER_NHOSTS"
 echo "   Processes per host: $LAUNCHER_PPN"
 echo "   Total processes:    $LAUNCHER_NPROCS"
 echo "   Total jobs:         $LAUNCHER_NJOBS"
 echo "   Scheduling method:  $LAUNCHER_SCHED"
+echo "-------------------------------------"
 echo
 if [ $LAUNCHER_USE_PHI -eq 1 ]
 then
@@ -141,7 +174,7 @@ then
 else
   for host in `cat $LAUNCHER_HOSTFILE`
   do
-    ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $*" &
+    ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" &
     i=`expr $i + 1`
   done
   wait
@@ -149,10 +182,12 @@ fi
 
 res=$?
 
+kill $LAUNCHER_DYN_PID
+
 if [ $res -ne 0 ]; then
-  echo "Launcher: Parametric job exited with code: $res"
+  echo "Launcher: Done. Job exited with code: $res"
 else
-  echo "Launcher: Parametric job exited without errors"
+  echo "Launcher: Done. Job exited without errors"
 fi
 
 exit $res

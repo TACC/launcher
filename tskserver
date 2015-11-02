@@ -5,18 +5,19 @@ import sys
 
 num=1
 maxnum=int(sys.argv[1])
-port=int(sys.argv[2])
+port=int(sys.argv[3])
 
 class TCPIntHandler(SocketServer.BaseRequestHandler):
   def handle(self):
     global num
     global server
     global maxnum
-    self.request.sendall("{}".format(num))
-    num+=1
     if num > maxnum:
-      server.socket.close()
+      self.request.sendall("Done")
+    else:
+      self.request.sendall("{}".format(num))
+      num+=1
 
-server = SocketServer.TCPServer(("localhost", port), TCPIntHandler)
+server = SocketServer.TCPServer((sys.argv[2], port), TCPIntHandler)
 
 server.serve_forever()

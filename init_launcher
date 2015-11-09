@@ -14,7 +14,7 @@ export LAUNCHER_NPROCS=$(($LAUNCHER_NHOSTS * $LAUNCHER_PPN))
 for i in `seq 0 $(($LAUNCHER_PPN - 1))`
 do
   #Start the launcher script for every process to be spawned on this host and give it a unique task id
-  env LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
+  env `$LAUNCHER_DIR/pass_env` LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
 done
 
 if [ ! "x$LAUNCHER_NPHI" == "x" ]
@@ -22,7 +22,7 @@ then
   #Start the launcher on the Intel Xeon Phi cards in this box
   for j in `seq 0 $(($LAUNCHER_NPHI - 1))`
   do
-    ssh mic$j "env `/sge_common/default/pe_scripts/build_env.pl` 
+    ssh mic$j "env `$LAUNCHER_DIR/pass_env` 
                LAUNCHER_PHI_ID=$(($LAUNCHER_HOST_ID * $LAUNCHER_NPHI + $j)) 
                $LAUNCHER_DIR/init_launcher_phi $*" &    
   done

@@ -72,7 +72,7 @@ fi
 #Backward Compatability with v2 and v1: Check for CONTROL_FILE
 if [ ! -z $CONTROL_FILE ]
 then
-  echo "NOTICE: CONTROL_FILE variable depricated. Use LAUNCHER_JOB_FILE in the future."
+  echo "NOTICE: CONTROL_FILE variable depricated. Use LAUNCHER_JOB_FILE in the future." >&2
   export LAUNCHER_JOB_FILE=$CONTROL_FILE
 fi
 
@@ -152,19 +152,21 @@ echo "Launcher: Setup complete."
 echo
 echo "------------- SUMMARY ---------------"
 echo "   Number of hosts:    $LAUNCHER_NHOSTS"
+echo "   Working directory:  $LAUNCHER_WORKDIR"
 echo "   Processes per host: $LAUNCHER_PPN"
 echo "   Total processes:    $LAUNCHER_NPROCS"
 echo "   Total jobs:         $LAUNCHER_NJOBS"
 echo "   Scheduling method:  $LAUNCHER_SCHED"
-echo "-------------------------------------"
-echo
 if [ $LAUNCHER_USE_PHI -eq 1 ]
 then
-  echo "--- Xeon Phi Support Enabled ---"
+  echo
+  echo "--- Intel Xeon Phi Support Enabled ---"
   echo "   Cards per host:     $LAUNCHER_NPHI"
   echo "   Processes per card: $LAUNCHER_PHI_PPN"
   echo
 fi
+echo
+echo "-------------------------------------"
 echo "Launcher: Starting parallel tasks..."
 
 i=0
@@ -174,7 +176,7 @@ then
 else
   for host in `cat $LAUNCHER_HOSTFILE`
   do
-    ssh $host "cd `pwd`; env `/sge_common/default/pe_scripts/build_env.pl` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" &
+    ssh $host "cd $LAUNCHER_WORKDIR; env `$LAUNCHER_DIR\pass_env` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" &
     i=`expr $i + 1`
   done
   wait

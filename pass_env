@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#PASS_PREFIX is a list of variable prefixes that should be passed to launcher tasks on remote hosts
+PASS_PREFIX="LAUNCHER TACC ICC GCC LMOD MV2 IMPI"
+
+GREP_ARGS=`
+  for prefix in $PASS_PREFIX
+  do
+    echo -n "-e ^$prefix "
+  done
+`
+
+env | grep $GREP_ARGS | tr '\n' ' '

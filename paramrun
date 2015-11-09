@@ -9,6 +9,19 @@ then
   exit
 fi
 
+
+if [ ! -d $LAUNCHER_WORKDIR ]
+then
+  #Check for older WORKDIR
+  if [ -d $WORKDIR ]
+    echo "NOTICE: WORKDIR variable has been depricated. Use LAUNCHER_WORKDIR." >&2
+    export LAUNCHER_WORKDIR=$WORKDIR
+  else
+    echo "WARNING: LAUNCHER_WORKDIR variable not set. Using current directory." >&2
+    export LAUNCHER_WORKDIR=`pwd`
+  fi
+fi
+
 #Step 0: Determine if resource manager integration is enabled
 if [ -z $LAUNCHER_PLUGIN_DIR ]
 then

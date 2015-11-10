@@ -49,8 +49,6 @@ else
   fi
 fi
 
-env | grep LAUNCHER
-
 #Step 1: Ensure that LAUNCHER_HOSTFILE is set and valid
 if [ -z $LAUNCHER_HOSTFILE ]
 then
@@ -145,6 +143,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   do
     $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME 9471 2>/dev/null &
     LAUNCHER_DYN_PID=$!
+    disown $LAUNCHER_DYN_PID
     sleep 1s
     if ! ps -p $! >/dev/null 2>/dev/null
     then
@@ -169,6 +168,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
     #Start another tskserver for the Intel Xeon Phi cards
     $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
     LAUNCHER_PHI_DYN_PID=$1
+    disown $LAUNCHER_PHI_DYN_PID
     export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME"
     export LAUNCHER_PHI_DYN_COUNT_PORT=9472
   fi
@@ -218,20 +218,15 @@ res=$?
 #Cleanup processes and files
 if [ ! "x$LAUNCHER_DYN_PID" == "x" ]
 then
-  disown $LAUNCHER_DYN_PID
   kill $LAUNCHER_DYN_PID
 fi
 
 if [ ! "x$LAUNCHER_PHI_DYN" == "x" ]
 then
-  disown $LAUNCHER_PHI_DYN_PID
   kill $LAUNCHER_PHI_DYN_PID
 fi
 
-if [ -f $LAUNCHER_RMI_HOSTFILE ]
-then
-  rm -f $LAUNCHER_RMI_HOSTFILE
-fi
+rm -f $LAUNCHER_RMI_HOSTFILE
 
 if [ $res -ne 0 ]; then
   echo "Launcher: Done. Job exited with code: $res"

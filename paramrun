@@ -49,6 +49,8 @@ else
   fi
 fi
 
+env | grep LAUNCHER
+
 #Step 1: Ensure that LAUNCHER_HOSTFILE is set and valid
 if [ -z $LAUNCHER_HOSTFILE ]
 then
@@ -204,7 +206,7 @@ then
 else
   for host in `cat $LAUNCHER_HOSTFILE`
   do
-    ssh $host "cd $LAUNCHER_WORKDIR; env `$LAUNCHER_DIR\pass_env` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" &
+    ssh $host "cd $LAUNCHER_WORKDIR; env `$LAUNCHER_DIR/pass_env` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" &
     i=`expr $i + 1`
   done
   wait

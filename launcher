@@ -29,9 +29,9 @@ then
 fi
 
 if [ "$LAUNCHER_ON_PHI" == "1" ];then
-  LAUNCHER_DYN_SRV="$LAUNCHER_PHI_DYN_COUNT"
+  LAUNCHER_DYN_SRV="$LAUNCHER_PHI_DYN_COUNT $LAUNCHER_PHI_DYN_COUNT_PORT"
 else
-  LAUNCHER_DYN_SRV="$LAUNCHER_DYN_COUNT"
+  LAUNCHER_DYN_SRV="$LAUNCHER_DYN_COUNT $LAUNCHER_DYN_COUNT_PORT"
 fi
 
 #if [ "$LAUNCHER_TSK_ID" == "0" ];then
@@ -74,14 +74,17 @@ fi
 COMPLETE="false"
 
 while [ $COMPLETE == "false" ]; do
-  export CMD=`grep -m $LAUNCHER_JID . $LAUNCHER_JOB_FILE | tail -n 1`
+  if [ ! "x$LAUNCHER_JID" == "x" ]
+  then
+    export CMD=`grep -m $LAUNCHER_JID . $LAUNCHER_JOB_FILE | tail -n 1`
 
-  START_TIME=`date +"%s"`
-  echo "Launcher: Task $LAUNCHER_TSK_ID running job $LAUNCHER_JID on `hostname` ($CMD)"
-  eval $CMD
-  END_TIME=`date +"%s"`
-  EXEC_TIME=`expr $END_TIME - $START_TIME`
-  echo "Launcher: Job $LAUNCHER_JID completed in $EXEC_TIME seconds."
+    START_TIME=`date +"%s"`
+    echo "Launcher: Task $LAUNCHER_TSK_ID running job $LAUNCHER_JID on `hostname` ($CMD)"
+    eval $CMD
+    END_TIME=`date +"%s"`
+    EXEC_TIME=`expr $END_TIME - $START_TIME`
+    echo "Launcher: Job $LAUNCHER_JID completed in $EXEC_TIME seconds."
+  fi
 
   if [ $LAUNCHER_SCHED == "interleaved" ]; then
     export LAUNCHER_JID=`expr $LAUNCHER_JID + $LAUNCHER_NPROCS`

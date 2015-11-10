@@ -1,0 +1,13 @@
+#Launcher Resource Manager Integration (RMI) file for SLURM
+
+#Create a hostfile and set LAUNCHER_RMI_HOSTFILE
+export LAUNCHER_RMI_HOSTFILE=`mktemp -t launcher.$SLURM_JOB_ID.hostlist.XXXXXXXX`
+
+#Populate the hostfile
+scontrol show hostname $SLURM_NODELIST > $LAUNCHER_RMI_HOSTFILE
+
+#Set the number of processes per node
+export LAUNCHER_RMI_PPN=`echo $SLURM_TASKS_PER_NODE | awk -F '(' '{print $1}'`
+
+#Set the number of hosts
+export LAUNCHER_RMI_NHOSTS=$SLURM_NNODES

@@ -1,0 +1,16 @@
+#Launcher Resource Manager Integration (RMI) file for SGE
+
+#Create a hostfile and set LAUNCHER_RMI_HOSTFILE
+export LAUNCHER_RMI_HOSTFILE=`mktemp -t launcher.$JOB_ID.hostlist.XXXXXXXX`
+
+#Populate the hostfile
+for i in `cat $pe_hostfile | cut -f 1 -d ' '`
+do
+  echo $i >> $LAUNCHER_RMI_HOSTFILE
+done
+
+#Set the number of processes per node (TACC specific)
+export LAUNCHER_RMI_PPN=`echo $PE | sed -e 's/way//g;'`
+
+#Set the number of hosts
+export LAUNCHER_RMI_NHOSTS=`wc -l $LAUNCHER_RMI_HOSTFILE | awk '{print $1}'`

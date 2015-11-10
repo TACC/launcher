@@ -20,4 +20,5 @@ class TCPIntHandler(SocketServer.BaseRequestHandler):
 
 server = SocketServer.TCPServer((sys.argv[2], port), TCPIntHandler)
 
+server.request_queue_size=100000
 server.serve_forever()

@@ -33,9 +33,10 @@ if [ -z $LAUNCHER_RMI ]
 then
   echo "Launcher: Starting without resource manager integration."
 else
-  if [ -f $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.plugin ]
+  if [ -f $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi ]
   then
-    source $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.plugin
+    source $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi
+    export LAUNCHER_HOSTFILE=$LAUNCHER_RMI_HOSTFILE
   else
     echo "WARNING: Resource Manager Integration plugin file $LAUNCHER_RMI.rmi no found." >&2
     echo "         Available options:" >&2
@@ -64,14 +65,24 @@ fi
 #Step 2: Ensure that necessary variables are set
 if [ -z $LAUNCHER_PPN ]
 then
-  echo "WARNING: LAUNCHER_PPN is not set. Defaulting to 1." >&2
-  export LAUNCHER_PPN=1
+  if [ -z $LAUNCHER_RMI_PPN ]
+  then
+    export LAUNCHER_PPN=$LAUNCHER_RMI_PPN
+  else
+    echo "WARNING: LAUNCHER_PPN is not set. Defaulting to 1." >&2
+    export LAUNCHER_PPN=1
+  fi
 fi
 
 if [ -z $LAUNCHER_NHOSTS ]
 then
-  echo "WARNING: LAUNCHER_NHOSTS is not set. Calculating from hostfile." >&2
-  export LAUNCHER_NHOSTS=`wc -l $LAUNCHER_HOSTFILE | awk '{print $1}'`
+  if [ -z $LAUNCHER_RMI_NHOSTS ]
+  then
+    export LAUNCHER_NHOSTS=$LAUNCHER_RMI_NHOSTS
+  else
+    echo "WARNING: LAUNCHER_NHOSTS is not set. Calculating from hostfile." >&2
+    export LAUNCHER_NHOSTS=`wc -l $LAUNCHER_HOSTFILE | awk '{print $1}'`
+  fi
 fi
 
 export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS \* $LAUNCHER_PPN`
@@ -153,6 +164,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   if [ $LAUNCHER_USE_PHI -ne "0" ]; then
     #Start another tskserver for the Intel Xeon Phi cards
     $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
+    LAUNCHER_PHI_DYN_PID=$1
     export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME 9472"
   fi
 fi
@@ -197,7 +209,22 @@ fi
 
 res=$?
 
-kill $LAUNCHER_DYN_PID
+
+#Cleanup processes and files
+if [ ! "x$LAUNCHER_DYN_PID" == "x" ]
+then
+  kill $LAUNCHER_DYN_PID
+fi
+
+if [ ! "x$LAUNCHER_PHI_DYN" == "x" ]
+then
+  kill $LAUNCHER_PHI_DYN_PID
+fi
+
+if [ -f $LAUNCHER_RMI_HOSTFILE ]
+then
+  rm -f $LAUNCHER_RMI_HOSTFILE
+fi
 
 if [ $res -ne 0 ]; then
   echo "Launcher: Done. Job exited with code: $res"

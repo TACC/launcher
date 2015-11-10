@@ -122,3 +122,5 @@ while [ $COMPLETE == "false" ]; do
   fi
 
 done
+
+echo "Launcher: Task $LAUNCHER_TSK_ID done. Exiting."

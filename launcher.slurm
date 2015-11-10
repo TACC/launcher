@@ -33,15 +33,9 @@
 #	   NOTE: The env variable $JOB_ID contains the job id. 
 #
 
-if [ "x$LAUNCHER_DIR" == "x" ]
-then
-  module load launcher/3.0
-fi
-
-module load python
-
 export LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
 export LAUNCHER_RMI=SLURM
+export LAUNCHER_JOB_FILE=jobfile
  
 $LAUNCHER_DIR/paramrun
 

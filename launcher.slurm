@@ -38,8 +38,10 @@ then
   module load launcher/3.0
 fi
 
+module load python
+
 export LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
-export LAUNCHER_RMI=SGE
+export LAUNCHER_RMI=SLURM
  
 $LAUNCHER_DIR/paramrun
 

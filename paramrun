@@ -68,7 +68,7 @@ fi
 #Step 2: Ensure that necessary variables are set
 if [ -z $LAUNCHER_PPN ]
 then
-  if [ -z $LAUNCHER_RMI_PPN ]
+  if [ ! -z $LAUNCHER_RMI_PPN ]
   then
     export LAUNCHER_PPN=$LAUNCHER_RMI_PPN
   else
@@ -79,7 +79,7 @@ fi
 
 if [ -z $LAUNCHER_NHOSTS ]
 then
-  if [ -z $LAUNCHER_RMI_NHOSTS ]
+  if [ ! -z $LAUNCHER_RMI_NHOSTS ]
   then
     export LAUNCHER_NHOSTS=$LAUNCHER_RMI_NHOSTS
   else

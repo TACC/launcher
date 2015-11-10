@@ -10,10 +10,11 @@ then
 fi
 
 
-if [ ! -d $LAUNCHER_WORKDIR ]
+if [ "x$LAUNCHER_WORKDIR" == "x" ]
 then
   #Check for older WORKDIR
-  if [ -d $WORKDIR ]
+  if [ ! "x$WORKDIR" == "x" ]
+  then
     echo "NOTICE: WORKDIR variable has been depricated. Use LAUNCHER_WORKDIR." >&2
     export LAUNCHER_WORKDIR=$WORKDIR
   else
@@ -159,13 +160,15 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
     fi
   done
 
-  export LAUNCHER_DYN_COUNT="$HOSTNAME 9471"
+  export LAUNCHER_DYN_COUNT="$HOSTNAME"
+  export LAUNCHER_DYN_COUNT_PORT=9471
 
   if [ $LAUNCHER_USE_PHI -ne "0" ]; then
     #Start another tskserver for the Intel Xeon Phi cards
     $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
     LAUNCHER_PHI_DYN_PID=$1
-    export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME 9472"
+    export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME"
+    export LAUNCHER_PHI_DYN_COUNT_PORT=9472
   fi
 fi
 
@@ -213,11 +216,13 @@ res=$?
 #Cleanup processes and files
 if [ ! "x$LAUNCHER_DYN_PID" == "x" ]
 then
+  disown $LAUNCHER_DYN_PID
   kill $LAUNCHER_DYN_PID
 fi
 
 if [ ! "x$LAUNCHER_PHI_DYN" == "x" ]
 then
+  disown $LAUNCHER_PHI_DYN_PID
   kill $LAUNCHER_PHI_DYN_PID
 fi
 

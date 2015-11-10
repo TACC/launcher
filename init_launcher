@@ -11,6 +11,8 @@
 #Calculate the number of processor based on number of hosts and wayness of the job
 export LAUNCHER_NPROCS=$(($LAUNCHER_NHOSTS * $LAUNCHER_PPN))
 
+$LAUNCHER_DIR/pass_env
+
 for i in `seq 0 $(($LAUNCHER_PPN - 1))`
 do
   #Start the launcher script for every process to be spawned on this host and give it a unique task id

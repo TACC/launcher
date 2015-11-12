@@ -127,12 +127,7 @@ fi
 #Step 5: Scheduling setup
 if [ "x$LAUNCHER_SCHED" == "x" ]
 then
-  if [ "x$LAUNCHER_LOCALHOST" == "x1" ]
-  then
-    export LAUNCHER_SCHED="interleaved"
-  else
-    export LAUNCHER_SCHED="dynamic"
-  fi
+  export LAUNCHER_SCHED="dynamic"
 fi
 
 if [ "$LAUNCHER_SCHED" == "dynamic" ]; then

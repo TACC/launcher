@@ -88,7 +88,7 @@ while [ $COMPLETE == "false" ]; do
 
   if [ $LAUNCHER_SCHED == "interleaved" ]; then
     export LAUNCHER_JID=`expr $LAUNCHER_JID + $LAUNCHER_NPROCS`
-    if [ $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]; then
+    if [ "x$LAUNCHER_JID" == "x" -o $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]; then
       COMPLETE="true"
     fi
   elif [ $LAUNCHER_SCHED == "block" ]; then

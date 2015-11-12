@@ -1,0 +1,30 @@
+Launcher
+Lucas A. Wilson
+Texas Advanced Computing Center
+lwilson@tacc.utexas.edu
+https://github.com/TACC/launcher
+
+INSTALLATION NOTES
+
+1) If the launcher will be used in a multi-node environment, place the source 
+   directory in a shared location that is universally mounted.
+
+2) Set the environment variable LAUNCHER_DIR to point to the launcher source directory.
+
+3) If desired, add LAUNCHER_DIR to PATH.
+
+RESOURCE MANAGER INTEGRATION
+
+If the launcher will be on a system managed by a resource manager, set LAUNCHER_RMI 
+to the name of the appropriate rmi file.
+
+Example: For SLURM, setting LAUNCHER_RMI=SLURM will make launcher reference
+${LAUNCHER_PLUGIN_DIR}/${LAUNCHER_RMI}.rmi
+
+When building a custom rmi file, be sure to set the following environment variables:
+  LAUNCHER_RMI_HOSTFILE
+  LAUNCHER_RMI_PPN
+  LAUNHCER_RMI_NHOSTS
+
+LAUNCHER_RMI_HOSTFILE should point to a temporary file which should be populated with 
+hostnames in the rmi plugin. mktemp is recommended for generating temporary filenames.

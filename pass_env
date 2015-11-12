@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #PASS_PREFIX is a list of variable prefixes that should be passed to launcher tasks on remote hosts
-PASS_PREFIX="LAUNCHER TACC ICC GCC LMOD MV2 IMPI PATH LD_LIBRARY_PATH"
+PASS_PREFIX="LAUNCHER TACC ICC GCC LMOD MV2 IMPI PATH LD_LIBRARY_PATH OMP KMP"
 
 GREP_ARGS=`
   for prefix in $PASS_PREFIX

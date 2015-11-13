@@ -20,7 +20,7 @@ Available Environment Variables:
   The launcher defines the following environment variables for each job 
   that is started:
 
-    * $CONTROL_FLE is the file containing the jobs to run in your parametric 
+    * $LAUNCHER_JOB_FILE is the file containing the jobs to run in your parametric 
       submission.
 
     * $LAUNCHER_NPROCS contains the number of processes running 
@@ -55,9 +55,9 @@ Task Scheduling Behavior:
   by setting the environment variable $LAUNCHER_SCHED:
   (descriptions below assume k = task, p = num. procs, n = num. jobs)
 
-    * interleaved (default) - each task k executes every (k+p)th line
+    * dynamic (default) - each task k executes first available unclaimed line
+    * interleaved - each task k executes every (k+p)th line
     * block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
-    * dynamic - each task k executes first available unclaimed line
 
 Using the launcher with Intel Xeon Phi cards:
 
@@ -71,7 +71,7 @@ Using the launcher with Intel Xeon Phi cards:
 
     * $LAUNCHER_PHI_PPN is the number of processes per Intel Xeon Phi card.
 
-    * $PHI_CONTROL_FILE is the file containing the jobs to run on the 
+    * $LAUNCHER_PHI_JOB_FILE is the file containing the jobs to run on the 
       Intel Xeon Phi cards. 
 
 Job Submission:
@@ -89,4 +89,4 @@ Job Submission:
         SLURM: launcher.slurm
 
 --
-Last Update: 1/29/2015
+Last Update: 11/13/2015

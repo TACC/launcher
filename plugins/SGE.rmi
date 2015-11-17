@@ -4,6 +4,11 @@
 export LAUNCHER_RMI_HOSTFILE=`mktemp -t launcher.$JOB_ID.hostlist.XXXXXXXX`
 
 #Populate the hostfile
+#Some systems use capital letters.
+if [ -f "$PE_HOSTFILE" ] && [ ! -f "$pe_hostfile" ]; then
+   pe_hostfile=$PE_HOSTFILE
+fi
+
 for i in `cat $pe_hostfile | cut -f 1 -d ' '`
 do
   echo $i >> $LAUNCHER_RMI_HOSTFILE

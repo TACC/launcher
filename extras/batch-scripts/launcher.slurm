@@ -13,25 +13,15 @@
 # 
 #         <------ Setup Parameters ------>
 #
-#$ -N Parametric 
-#$ -pe 4way 48
-#$ -q development
-#$ -o Parametric.o$JOB_ID
-#$ -l h_rt=1:00:00
-#$ -V
-#$ -cwd
-#   <------ You MUST Specify a Project String ----->
-#$ -A A-ccsc 
+#SBATCH -J Parametric 
+#SBATCH -n 16
+#SBATCH -p development
+#SBATCH -o Parametric.o%j
+#SBATCH -t 00:05:00
+#          <------ Account String ----->
+# <--- (Use this ONLY if you have MULTIPLE accounts) --->
+##SBATCH -A
 #------------------------------------------------------
-#
-# Usage:
-#	#$ -pe <parallel environment> <number of slots> 
-#	#$ -l h_rt=hours:minutes:seconds to specify run time limit
-# 	#$ -N <job name>
-# 	#$ -q <queue name>
-# 	#$ -o <job output file>
-#	   NOTE: The env variable $JOB_ID contains the job id. 
-#
 
 export LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
 export LAUNCHER_RMI=SLURM

@@ -68,7 +68,7 @@ elif [ $LAUNCHER_SCHED == "block" ]; then
   nextblock=`expr \( $LAUNCHER_TSK_ID + 1 \) \* $blocks + 1`
 else
   # Grab the JID to run from The Count
-  export LAUNCHER_JID=`nc $LAUNCHER_DYN_SRV`
+  export LAUNCHER_JID=`nc -d $LAUNCHER_DYN_SRV`
 fi 
 
 COMPLETE="false"
@@ -100,7 +100,7 @@ while [ $COMPLETE == "false" ]; do
     RETRY=0
     while [ $RETRY -lt 3 ]
     do
-      export LAUNCHER_JID=`nc $LAUNCHER_DYN_SRV`
+      export LAUNCHER_JID=`nc -d $LAUNCHER_DYN_SRV`
       if [ "x$LAUNCHER_JID" == "x" ]
       then
         if [ $RETRY -lt 3 ]

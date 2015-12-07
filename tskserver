@@ -3,6 +3,11 @@
 import SocketServer
 import sys
 
+(major, minor)=sys.version_info[:2]
+if major<=2 and minor < 7:
+  print "ERROR: Python version 2.7 or better required"
+  sys.exit(1)
+
 num=1
 maxnum=int(sys.argv[1])
 port=int(sys.argv[3])

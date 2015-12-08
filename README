@@ -5,23 +5,28 @@ Launcher: a simple utility for submitting multiple
 
 To use:
 
-  Copy the example "paramlist" input file to your working directory
-  and edit to supply the name of each serial application to
-  run per allocated process (these can be the same for each process,
-  but there needs to be a separate line specified for each desired task).
-  Note that example paramlist file provided is setup
-  to run 8 instances of the program named "hello"; the stdin
-  for this application is a single integer. Source code in Fortran and
-  a pre-built binary is provided for the hello world application which
-  can be used to test the batch launcher.
+  * Set LAUNCHER_JOB_FILE to point to your job file. Example job files
+    are provided in extras/examples.
+
+  * Be sure that LAUNCHER_DIR is set to the directory containing the 
+    launcher source files (user-installed ONLY. Not required if using
+    system installed version of launcher).
+
+  * From the command-line or within your jobscript, run:
+    $LAUNCHER_DIR/paramrun
 
 Available Environment Variables:
 
-  The launcher defines the following environment variables for each job 
-  that is started:
+  You should set the following environment variables:
 
     * $LAUNCHER_JOB_FILE is the file containing the jobs to run in your parametric 
       submission.
+
+    * $LAUNCHER_WORKDIR is the directory where the launcher will execute. 
+      All relative paths will resolve to this directory.
+
+  The launcher defines the following environment variables for each job 
+  that is started:
 
     * $LAUNCHER_NPROCS contains the number of processes running 
       simultaneously in your parametric submission.
@@ -89,4 +94,4 @@ Job Submission:
         SLURM: launcher.slurm
 
 --
-Last Update: 11/13/2015
+Last Update: 12/08/2015

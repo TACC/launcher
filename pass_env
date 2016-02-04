@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#PASS_PREFIX is a list of variable prefixes that should be passed to launcher tasks on remote hosts
-PASS_PREFIX="LAUNCHER TACC ICC GCC LMOD MV2 IMPI PATH LD_LIBRARY_PATH OMP KMP MIC PYTHON"
+#EXCLUDE is a list of patterns that should be removed from the environment before passing to launcher tasks on remote hosts
+EXCLUDE="BASH_FUNC ModuleTable LS_ LESS SSH_ PE_MPICH MINICOM"
 
 GREP_ARGS=`
-  for prefix in $PASS_PREFIX
+  for prefix in $EXCLUDE
   do
     echo -n "-e ^$prefix "
   done
 `
 
-env | grep $GREP_ARGS | tr '\n' ' '
+env | grep -v -e "}$" -e "^ " -e "=$" -e "^_" -e "(" $GREP_ARGS | tr '\n' ' '

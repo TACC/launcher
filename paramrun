@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 
@@ -169,6 +169,33 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   fi
 fi
 
+if [ $LAUNCHER_BIND -eq 1 ]
+then
+  num_socks=$(lstopo-no-graphics --only socket | wc -l | awk '{print $1}')
+  if [ $num_socks -eq 0 ]
+  then
+    num_socks=1
+  fi
+  num_cores=$(lstopo-no-graphics --only core | wc -l | awk '{print $1}')
+  num_threads=$(lstopo-no-graphics --only pu | wc -l | awk '{print $1}')
+  if [ $LAUNCHER_PPN -gt $num_cores ]
+  then
+    export LAUNCHER_BIND_HT=1
+    if [ $LAUNCHER_PPN -gt $num_threads ]
+    then
+      echo "WARNING: Requested Processes per Node ($LAUNCHER_PPN) exceeds number of available threads ($num_threads). Resetting..."
+      export LAUNCHER_PPN=$num_threads
+      export LAUNCHER_NPROCS=$(($LAUNCHER_NHOSTS * $LAUNCHER_PPN))
+    fi
+    pu_per_task=$(($num_threads / $LAUNCHER_PPN))
+  else
+    export LAUNCHER_BIND_HT=0
+    pu_per_task=$(($num_cores / $LAUNCHER_PPN))
+  fi
+
+  export LAUNCHER_PUPT=$pu_per_task
+fi
+
 #------------------------------
 # Let's finally launch the job
 #------------------------------
@@ -182,13 +209,29 @@ echo "   Processes per host: $LAUNCHER_PPN"
 echo "   Total processes:    $LAUNCHER_NPROCS"
 echo "   Total jobs:         $LAUNCHER_NJOBS"
 echo "   Scheduling method:  $LAUNCHER_SCHED"
+if [ $LAUNCHER_BIND -eq 1 ]
+then
+  echo
+  echo "------ Process Binding Enabled ------"
+  echo "   Sockets per host:   $num_socks"
+  echo "   Cores per host:     $num_cores"
+  echo "   Threads per host:   $num_threads"
+  echo -n "   Binding each task to $LAUNCHER_PUPT "
+  if [ $LAUNCHER_BIND_HT -eq 1 ]
+  then
+    echo "threads (Hyperthreads in use)"
+  else
+    echo "cores (Hyperthreads ignored)"
+  fi
+fi
+
+
 if [ $LAUNCHER_USE_PHI -eq 1 ]
 then
   echo
   echo "--- Intel Xeon Phi Support Enabled ---"
   echo "   Cards per host:     $LAUNCHER_NPHI"
   echo "   Processes per card: $LAUNCHER_PHI_PPN"
-  echo
 fi
 echo
 echo "-------------------------------------"

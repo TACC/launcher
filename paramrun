@@ -1,6 +1,4 @@
-#!/bin/sh
-
-
+#!/bin/bash
 
 
 if [ -z $LAUNCHER_DIR ]
@@ -112,6 +110,7 @@ else
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
   else
     echo "ERROR: LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found." >&2
+    exit
   fi
 fi
 

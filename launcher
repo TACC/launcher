@@ -80,7 +80,7 @@ while [ $COMPLETE == "false" ]; do
 
     START_TIME=`date +"%s"`
     echo "Launcher: Task $LAUNCHER_TSK_ID running job $LAUNCHER_JID on `hostname` ($CMD)"
-    eval $CMD
+    eval $LAUNCHER_HWLOC_CMD $CMD
     END_TIME=`date +"%s"`
     EXEC_TIME=`expr $END_TIME - $START_TIME`
     echo "Launcher: Job $LAUNCHER_JID completed in $EXEC_TIME seconds."

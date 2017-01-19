@@ -8,11 +8,30 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
-for i in `seq 0 $(($LAUNCHER_PPN - 1))`
-do
-  #Start the launcher script for every process to be spawned on this host and give it a unique task id
-  env `$LAUNCHER_DIR/pass_env` LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
-done
+if [ "$LAUNCHER_BIND" -eq "1" ]
+then
+  if [ $LAUNCHER_BIND_HT -eq 1 ]
+  then
+    bind_obj="pu"
+  else
+    bind_obj="core"
+  fi
+
+  for i in `seq 0 $(($LAUNCHER_PPN - 1))`
+  do
+    spu=$(($i * $LAUNCHER_PUPT))
+    epu=$(($spu + $LAUNCHER_PUPT - 1))
+    #Start the launcher script for every process to be spawned on this host and give it a unique task id
+    env `$LAUNCHER_DIR/pass_env` LAUNCHER_HWLOC_CMD="hwloc-bind ${bind_obj}:$spu-$epu" LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
+  done
+else
+  for i in `seq 0 $(($LAUNCHER_PPN - 1))`
+  do
+    #Start the launcher script for every process to be spawned on this host and give it a unique task id
+    env `$LAUNCHER_DIR/pass_env` LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
+  done
+fi
+
 
 if [ ! "x$LAUNCHER_NPHI" == "x" ]
 then

@@ -8,9 +8,9 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
-if [ "$LAUNCHER_BIND" -eq "1" ]
+if [ "$LAUNCHER_BIND" == "1" ]
 then
-  if [ $LAUNCHER_BIND_HT -eq 1 ]
+  if [ "$LAUNCHER_BIND_HT" == "1" ]
   then
     bind_obj="pu"
   else

@@ -208,7 +208,7 @@ echo "   Processes per host: $LAUNCHER_PPN"
 echo "   Total processes:    $LAUNCHER_NPROCS"
 echo "   Total jobs:         $LAUNCHER_NJOBS"
 echo "   Scheduling method:  $LAUNCHER_SCHED"
-if [ $LAUNCHER_BIND -eq 1 ]
+if [ "$LAUNCHER_BIND" == "1" ]
 then
   echo
   echo "------ Process Binding Enabled ------"
@@ -216,7 +216,7 @@ then
   echo "   Cores per host:     $num_cores"
   echo "   Threads per host:   $num_threads"
   echo -n "   Binding each task to $LAUNCHER_PUPT "
-  if [ $LAUNCHER_BIND_HT -eq 1 ]
+  if [ "$LAUNCHER_BIND_HT" == "1" ]
   then
     echo "threads (Hyperthreads in use)"
   else
@@ -225,7 +225,7 @@ then
 fi
 
 
-if [ $LAUNCHER_USE_PHI -eq 1 ]
+if [ "$LAUNCHER_USE_PHI" == "1" ]
 then
   echo
   echo "--- Intel Xeon Phi Support Enabled ---"

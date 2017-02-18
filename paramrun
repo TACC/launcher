@@ -168,7 +168,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   fi
 fi
 
-if [ $LAUNCHER_BIND -eq 1 ]
+if [ "$LAUNCHER_BIND" == "1" ]
 then
   num_socks=$(lstopo-no-graphics --only socket | wc -l | awk '{print $1}')
   if [ $num_socks -eq 0 ]

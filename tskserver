@@ -1,11 +1,24 @@
 #!/usr/bin/env python
 
-import SocketServer
+try:
+  import socketserver as SocketServer
+
+  def prepare_str(s):
+    # convert str s to bytes when using Python 3
+    return bytes(s, "utf-8")
+
+except ImportError:
+  import SocketServer
+
+  def prepare_str(s):
+    # no conversion required when using Python 2
+    return s
+
 import sys
 
 (major, minor)=sys.version_info[:2]
 if major<=2 and minor < 7:
-  print "ERROR: Python version 2.7 or better required"
+  print("ERROR: Python version 2.7 or better required")
   sys.exit(1)
 
 num=1
@@ -18,9 +31,9 @@ class TCPIntHandler(SocketServer.BaseRequestHandler):
     global server
     global maxnum
     if num > maxnum:
-      self.request.sendall("Done")
+      self.request.sendall(prepare_str("Done"))
     else:
-      self.request.sendall("{}".format(num))
+      self.request.sendall(prepare_str(str(num)))
       num+=1
 
 server = SocketServer.TCPServer((sys.argv[2], port), TCPIntHandler)

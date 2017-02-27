@@ -141,7 +141,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
     sleep 1s
     if ! ps -p $! >/dev/null 2>/dev/null
     then
-      if [ $RETRY -ne 3 ]
+      if [ $RETRY -ne 10 ]
       then
         echo "WARNING: Unable to start dynamic task service. Retrying..."
         RETRY=`expr $RETRY + 1`

@@ -75,6 +75,19 @@ fi
 
 COMPLETE="false"
 
+#Check to see if the job id is larger than the task id. If so, termine
+#BUGFIX for github issue #16 https://github.com/TACC/launcher/issues/16
+if [ ! "$LAUNCHER_JID" == "Done" ]
+then
+  if [ $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]
+  then
+    COMPLETE="overallocate"
+  fi
+else
+  COMPLETE="overallocate"
+fi
+
+
 while [ $COMPLETE == "false" ]; do
   if [ ! "x$LAUNCHER_JID" == "x" ]
   then
@@ -125,4 +138,7 @@ while [ $COMPLETE == "false" ]; do
 
 done
 
-echo "Launcher: Task $LAUNCHER_TSK_ID done. Exiting."
+if [ $COMPLETE == "true" ]
+then
+  echo "Launcher: Task $LAUNCHER_TSK_ID done. Exiting."
+fi

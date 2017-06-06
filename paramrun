@@ -1,10 +1,28 @@
 #!/bin/bash
 
+function lwarn {
+  if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
+  then
+    date +"$1 (%D %T): $2" >&2
+  else
+    date +"$1 (%D %T): $2" >>$LAUNCHER_LOGFILE
+  fi
+}
+
+function lexit {
+  if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
+  then
+    echo "Launcher exited without completing."
+  else
+    echo "Launcher exited without completing. Please check LAUNCHER_LOGFILE ($LAUNCHER_LOGFILE)."
+  fi
+  exit
+}
 
 if [ -z $LAUNCHER_DIR ]
 then
-  echo "ERROR: Launcher base directory LAUNCHER_DIR not set. Exiting." >&2
-  exit
+  lwarn ERROR "Launcher base directory LAUNCHER_DIR not set. Exiting."
+  lexit
 fi
 
 
@@ -13,10 +31,10 @@ then
   #Check for older WORKDIR
   if [ ! "x$WORKDIR" == "x" ]
   then
-    echo "NOTICE: WORKDIR variable has been depricated. Use LAUNCHER_WORKDIR." >&2
+    lwarn NOTICE "WORKDIR variable has been depricated. Use LAUNCHER_WORKDIR."
     export LAUNCHER_WORKDIR=$WORKDIR
   else
-    echo "WARNING: LAUNCHER_WORKDIR variable not set. Using current directory." >&2
+    lwarn WARNING "LAUNCHER_WORKDIR variable not set. Using current directory."
     export LAUNCHER_WORKDIR=`pwd`
   fi
 fi
@@ -24,7 +42,7 @@ fi
 #Step 0: Determine if resource manager integration is enabled
 if [ -z $LAUNCHER_PLUGIN_DIR ]
 then
-  echo "WARNING: LAUNCHER_PLUGIN_DIR not set. Defaulting to $LAUNCHER_DIR/plugins." >&2
+  lwarn WARNING "LAUNCHER_PLUGIN_DIR not set. Defaulting to $LAUNCHER_DIR/plugins."
   LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
 fi
 
@@ -37,27 +55,27 @@ else
     source $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi
     export LAUNCHER_HOSTFILE=$LAUNCHER_RMI_HOSTFILE
   else
-    echo "WARNING: Resource Manager Integration plugin file $LAUNCHER_RMI.rmi no found." >&2
-    echo "         Available options:" >&2
+    lwarn WARNING "Resource Manager Integration plugin file $LAUNCHER_RMI.rmi no found."
+    lwarn "" "         Available options:"
     for rmi in `ls $LAUNCHER_PLUGIN_DIR/*.rmi 2>/dev/null` 
     do
-      echo "           `basename $rmi .rmi`" >&2
+      lwarn "" "           `basename $rmi .rmi`"
     done
-    echo "         Defaulting to no integration." >&2
+    lwarn "" "         Defaulting to no integration."
   fi
 fi
 
 #Step 1: Ensure that LAUNCHER_HOSTFILE is set and valid
 if [ -z $LAUNCHER_HOSTFILE ]
 then
-  echo "WARNING: LAUNCHER_HOSTFILE is not set. Defaulting to localhost." >&2
+  lwarn WARNING "LAUNCHER_HOSTFILE is not set. Defaulting to localhost."
   LAUNCHER_LOCALHOST=1
   export LAUNCHER_NHOSTS=1
 else
   if [ ! -f $LAUNCHER_HOSTFILE ]
   then
-    echo "ERROR: Hostfile ($LAUNCHER_HOSTFILE) not found." >&2
-    exit
+    lwarn ERROR "Hostfile ($LAUNCHER_HOSTFILE) not found."
+    lexit
   fi
 fi
 
@@ -68,7 +86,7 @@ then
   then
     export LAUNCHER_PPN=$LAUNCHER_RMI_PPN
   else
-    echo "WARNING: LAUNCHER_PPN is not set. Defaulting to 1." >&2
+    lwarn WARNING "LAUNCHER_PPN is not set. Defaulting to 1."
     export LAUNCHER_PPN=1
   fi
 fi
@@ -79,7 +97,7 @@ then
   then
     export LAUNCHER_NHOSTS=$LAUNCHER_RMI_NHOSTS
   else
-    echo "WARNING: LAUNCHER_NHOSTS is not set. Calculating from hostfile." >&2
+    lwarn WARNING "LAUNCHER_NHOSTS is not set. Calculating from hostfile."
     export LAUNCHER_NHOSTS=`wc -l $LAUNCHER_HOSTFILE | awk '{print $1}'`
   fi
 fi
@@ -88,29 +106,29 @@ export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS \* $LAUNCHER_PPN`
 
 if [ -z $LAUNCHER_NPROCS ]
 then
-  echo "ERROR: LAUNCHER_NPROCS is not set." >&2
-  exit
+  lwarn ERROR "LAUNCHER_NPROCS is not set."
+  lexit
 fi
 
 #Backward Compatability with v2 and v1: Check for CONTROL_FILE
 if [ ! -z $CONTROL_FILE ]
 then
-  echo "NOTICE: CONTROL_FILE variable depricated. Use LAUNCHER_JOB_FILE in the future." >&2
+  lwarn NOTICE "CONTROL_FILE variable depricated. Use LAUNCHER_JOB_FILE in the future."
   export LAUNCHER_JOB_FILE=$CONTROL_FILE
 fi
 
 #Step 3: Ensure that LAUNCHER_JOB_FILE exists
 if [ -z $LAUNCHER_JOB_FILE ]
 then
-  echo "WARNING: LAUNCHER_JOB_FILE not set." >&2
-  exit
+  lwarn WARNING "LAUNCHER_JOB_FILE not set."
+  lexit
 else
   if [ -f $LAUNCHER_JOB_FILE ]
   then
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
   else
-    echo "ERROR: LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found." >&2
-    exit
+    lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found."
+    lexit
   fi
 fi
 
@@ -143,12 +161,12 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
     then
       if [ $RETRY -ne 10 ]
       then
-        echo "WARNING: Unable to start dynamic task service. Retrying..."
+        lwarn WARNING "Unable to start dynamic task service. Retrying..."
         RETRY=`expr $RETRY + 1`
         sleep 10s
       else 
-        echo "ERROR: Unable to start dynamic task service. Shutting down."
-        exit
+        lwarn ERROR "Unable to start dynamic task service. Shutting down."
+        lexit
       fi
     else
       RUNNING="true"
@@ -182,7 +200,7 @@ then
     export LAUNCHER_BIND_HT=1
     if [ $LAUNCHER_PPN -gt $num_threads ]
     then
-      echo "WARNING: Requested Processes per Node ($LAUNCHER_PPN) exceeds number of available threads ($num_threads). Resetting..."
+      lwarn WARNING "Requested Processes per Node ($LAUNCHER_PPN) exceeds number of available threads ($num_threads). Resetting..."
       export LAUNCHER_PPN=$num_threads
       export LAUNCHER_NPROCS=$(($LAUNCHER_NHOSTS * $LAUNCHER_PPN))
     fi

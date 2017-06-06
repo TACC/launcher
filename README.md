@@ -1,19 +1,17 @@
--------------------------------------------------------------------------
-Launcher: a simple utility for submitting multiple 
-          serial applications simultaneously. 
--------------------------------------------------------------------------
+# Launcher
+## a simple utility for submitting multiple serial applications simultaneously. 
 
 To use:
 
-  * Set LAUNCHER_JOB_FILE to point to your job file. Example job files
+  * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files
     are provided in extras/examples.
 
-  * Be sure that LAUNCHER_DIR is set to the directory containing the 
+  * Be sure that `LAUNCHER_DIR` is set to the directory containing the 
     launcher source files (user-installed ONLY. Not required if using
     system installed version of launcher).
 
   * From the command-line or within your jobscript, run:
-    $LAUNCHER_DIR/paramrun
+    `$LAUNCHER_DIR/paramrun`
 
 Available Environment Variables:
 

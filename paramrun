@@ -1,19 +1,17 @@
 #!/bin/bash
 
-if [ "x$LAUNCHER_TS" == "x" -o "x$LAUNCHER_TS" == "x0" ]
-then
-  function lwarn {
-    echo $1 >&2
-  }
-else
-  function lwarn {
-    date +"%D %T $1" >&2
-  }
-fi
+function lwarn {
+  if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
+  then
+    date +"ERROR (%D %T): $1" >&2
+  else
+    date +"ERROR (%D %T): $1" >$LAUNCHER_LOGFILE
+  fi
+}
 
 if [ -z $LAUNCHER_DIR ]
 then
-  lwarn "ERROR: Launcher base directory LAUNCHER_DIR not set. Exiting."
+  lwarn "Launcher base directory LAUNCHER_DIR not set. Exiting."
   exit
 fi
 
@@ -66,7 +64,7 @@ then
 else
   if [ ! -f $LAUNCHER_HOSTFILE ]
   then
-    lwarn "ERROR: Hostfile ($LAUNCHER_HOSTFILE) not found."
+    lwarn "Hostfile ($LAUNCHER_HOSTFILE) not found."
     exit
   fi
 fi
@@ -98,7 +96,7 @@ export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS \* $LAUNCHER_PPN`
 
 if [ -z $LAUNCHER_NPROCS ]
 then
-  lwarn "ERROR: LAUNCHER_NPROCS is not set."
+  lwarn "LAUNCHER_NPROCS is not set."
   exit
 fi
 
@@ -119,7 +117,7 @@ else
   then
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
   else
-    lwarn "ERROR: LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found."
+    lwarn "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found."
     exit
   fi
 fi
@@ -157,7 +155,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
         RETRY=`expr $RETRY + 1`
         sleep 10s
       else 
-        lwarn "ERROR: Unable to start dynamic task service. Shutting down."
+        lwarn "Unable to start dynamic task service. Shutting down."
         exit
       fi
     else

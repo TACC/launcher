@@ -9,10 +9,20 @@ function lwarn {
   fi
 }
 
+function lexit {
+  if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
+  then
+    echo "Launcher exited without completing."
+  else
+    echo "Launcher exited without completing. Please check LAUNCHER_LOGFILE ($LAUNCHER_LOGFILE)."
+  fi
+  exit
+}
+
 if [ -z $LAUNCHER_DIR ]
 then
   lwarn ERROR "Launcher base directory LAUNCHER_DIR not set. Exiting."
-  exit
+  lexit
 fi
 
 
@@ -65,7 +75,7 @@ else
   if [ ! -f $LAUNCHER_HOSTFILE ]
   then
     lwarn ERROR "Hostfile ($LAUNCHER_HOSTFILE) not found."
-    exit
+    lexit
   fi
 fi
 
@@ -97,7 +107,7 @@ export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS \* $LAUNCHER_PPN`
 if [ -z $LAUNCHER_NPROCS ]
 then
   lwarn ERROR "LAUNCHER_NPROCS is not set."
-  exit
+  lexit
 fi
 
 #Backward Compatability with v2 and v1: Check for CONTROL_FILE
@@ -111,14 +121,14 @@ fi
 if [ -z $LAUNCHER_JOB_FILE ]
 then
   lwarn WARNING "LAUNCHER_JOB_FILE not set."
-  exit
+  lexit
 else
   if [ -f $LAUNCHER_JOB_FILE ]
   then
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
   else
     lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found."
-    exit
+    lexit
   fi
 fi
 
@@ -156,7 +166,7 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
         sleep 10s
       else 
         lwarn ERROR "Unable to start dynamic task service. Shutting down."
-        exit
+        lexit
       fi
     else
       RUNNING="true"

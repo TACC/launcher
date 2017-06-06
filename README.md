@@ -1,58 +1,40 @@
 # Launcher
 ## a simple utility for submitting multiple serial applications simultaneously. 
 
-To use:
+### Quickstart
 
-  * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files
-    are provided in extras/examples.
+  * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.
+  * Be sure that `LAUNCHER_DIR` is set to the directory containing the launcher source files (user-installed ONLY. Not required if using system installed version of launcher).
+  * From the command-line or within your jobscript, run:`$LAUNCHER_DIR/paramrun`
 
-  * Be sure that `LAUNCHER_DIR` is set to the directory containing the 
-    launcher source files (user-installed ONLY. Not required if using
-    system installed version of launcher).
-
-  * From the command-line or within your jobscript, run:
-    `$LAUNCHER_DIR/paramrun`
-
-Available Environment Variables:
+### Available Environment Variables:
 
   You should set the following environment variables:
 
-    * $LAUNCHER_JOB_FILE is the file containing the jobs to run in your parametric 
-      submission.
-
-    * $LAUNCHER_WORKDIR is the directory where the launcher will execute. 
-      All relative paths will resolve to this directory.
+  * `$LAUNCHER_JOB_FILE` is the file containing the jobs to run in your parametric submission.
+  * `$LAUNCHER_WORKDIR` is the directory where the launcher will execute. All relative paths will resolve to this directory.
 
   The launcher defines the following environment variables for each job 
   that is started:
 
-    * $LAUNCHER_NPROCS contains the number of processes running 
-      simultaneously in your parametric submission.
-
-    * $LAUNCHER_NHOSTS contains the number of hosts running
-      simultaneously in your parametric submission.
-
-    * $LAUNCHER_PPN contains the number of processes per node.
-
-    * $LAUNCHER_NJOBS contains the number of jobs in your paramfile.
-
-    * $LAUNCHER_TSK_ID is the particular processing core that the job is 
-      running on, from 0 to $LAUNCHER_NPROCS-1.
-
-    * $LAUNCHER_JID represents the particular job instance currently 
-      running. $LAUNCHER_JID is numbered from 1 to $LAUNCHER_NJOBS.
+  * `$LAUNCHER_NPROCS` contains the number of processes running simultaneously in your parametric submission.
+  * `$LAUNCHER_NHOSTS` contains the number of hosts running simultaneously in your parametric submission.
+  * `$LAUNCHER_PPN` contains the number of processes per node.
+  * `$LAUNCHER_NJOBS` contains the number of jobs in your job file.
+  * `$LAUNCHER_TSK_ID` is the particular processing core that the job is running on, from 0 to `$LAUNCHER_NPROCS-1`.
+  * `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
 
   Example: If you want to redirect stdout to a file containing the unique ID
   of each line, you can specify the following in the paramlist file:
-    a.out > out.o$LAUNCHER_JID
+    ```a.out > out.o$LAUNCHER_JID```
   If this particular execution instance of a.out was the first line in the
-  paramlist file, the output would be placed in the file "out.o1".
+  job file, the output would be placed in the file "out.o1".
 
   Note: you can also use the launcher to run a sequence of serial
   jobs when you have more jobs to run than the requested number of
   processors.  
 
-Task Scheduling Behavior:
+### Task Scheduling Behavior:
 
   The launcher has three available behaviors for scheduling jobs, available
   by setting the environment variable $LAUNCHER_SCHED:

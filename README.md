@@ -1,13 +1,12 @@
-# Launcher
-## a simple utility for submitting multiple serial applications simultaneously. 
+# Launcher: a simple utility for submitting multiple serial applications simultaneously 
 
-### Quickstart
+## Quickstart
 
 * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.
 * Be sure that `LAUNCHER_DIR` is set to the directory containing the launcher source files (user-installed ONLY. Not required if using system installed version of launcher).
 * From the command-line or within your jobscript, run:`$LAUNCHER_DIR/paramrun`
 
-### Available Environment Variables
+## Available Environment Variables
 
 You should set the following environment variables:
 
@@ -29,7 +28,7 @@ If this particular execution instance of a.out was the first line in the job fil
 
 Note: you can also use the launcher to run a sequence of serial jobs when you have more jobs to run than the requested number of processors.  
 
-### Task Scheduling Behavior
+## Task Scheduling Behavior
 
 The launcher has three available behaviors for scheduling jobs, available by setting the environment variable `$LAUNCHER_SCHED`: (descriptions below assume k = task, p = num. procs, n = num. jobs)
 
@@ -37,7 +36,7 @@ The launcher has three available behaviors for scheduling jobs, available by set
 * interleaved - each task k executes every (k+p)th line
 * block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
 
-### Using the launcher with Intel Xeon Phi cards
+## Using the launcher with Intel Xeon Phi cards
 
 The launcher has the ability to execute appropriately compiled executables natively on Intel Xeon Phi (MIC) cards.
 
@@ -47,7 +46,7 @@ Available Environment Variables for Intel Xeon Phi execution:
 * $LAUNCHER_PHI_PPN is the number of processes per Intel Xeon Phi card.
 * $LAUNCHER_PHI_JOB_FILE is the file containing the jobs to run on the Intel Xeon Phi cards. 
 
-### Job Submission
+## Job Submission
 
   Copy the example job submission script `launcher.<sched>` to your
   working directory to use as a starting point for interfacing with

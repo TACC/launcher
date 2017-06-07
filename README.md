@@ -3,65 +3,53 @@
 
 ### Quickstart
 
-  * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.
-  * Be sure that `LAUNCHER_DIR` is set to the directory containing the launcher source files (user-installed ONLY. Not required if using system installed version of launcher).
-  * From the command-line or within your jobscript, run:`$LAUNCHER_DIR/paramrun`
+* Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.
+* Be sure that `LAUNCHER_DIR` is set to the directory containing the launcher source files (user-installed ONLY. Not required if using system installed version of launcher).
+* From the command-line or within your jobscript, run:`$LAUNCHER_DIR/paramrun`
 
-### Available Environment Variables:
+### Available Environment Variables
 
-  You should set the following environment variables:
+You should set the following environment variables:
 
-  * `$LAUNCHER_JOB_FILE` is the file containing the jobs to run in your parametric submission.
-  * `$LAUNCHER_WORKDIR` is the directory where the launcher will execute. All relative paths will resolve to this directory.
+* `$LAUNCHER_JOB_FILE` is the file containing the jobs to run in your parametric submission.
+* `$LAUNCHER_WORKDIR` is the directory where the launcher will execute. All relative paths will resolve to this directory.
 
-  The launcher defines the following environment variables for each job 
-  that is started:
+The launcher defines the following environment variables for each job that is started:
 
-  * `$LAUNCHER_NPROCS` contains the number of processes running simultaneously in your parametric submission.
-  * `$LAUNCHER_NHOSTS` contains the number of hosts running simultaneously in your parametric submission.
-  * `$LAUNCHER_PPN` contains the number of processes per node.
-  * `$LAUNCHER_NJOBS` contains the number of jobs in your job file.
-  * `$LAUNCHER_TSK_ID` is the particular processing core that the job is running on, from 0 to `$LAUNCHER_NPROCS-1`.
-  * `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
+* `$LAUNCHER_NPROCS` contains the number of processes running simultaneously in your parametric submission.
+* `$LAUNCHER_NHOSTS` contains the number of hosts running simultaneously in your parametric submission.
+* `$LAUNCHER_PPN` contains the number of processes per node.
+* `$LAUNCHER_NJOBS` contains the number of jobs in your job file.
+* `$LAUNCHER_TSK_ID` is the particular processing core that the job is running on, from 0 to `$LAUNCHER_NPROCS-1`.
+* `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
 
-  Example: If you want to redirect stdout to a file containing the unique ID
-  of each line, you can specify the following in the paramlist file:
-    ```a.out > out.o$LAUNCHER_JID```
-  If this particular execution instance of a.out was the first line in the
-  job file, the output would be placed in the file "out.o1".
+Example: If you want to redirect stdout to a file containing the unique ID of each line, you can specify the following in the paramlist file: ```a.out > out.o$LAUNCHER_JID```
+    
+If this particular execution instance of a.out was the first line in the job file, the output would be placed in the file "out.o1".
 
-  Note: you can also use the launcher to run a sequence of serial
-  jobs when you have more jobs to run than the requested number of
-  processors.  
+Note: you can also use the launcher to run a sequence of serial jobs when you have more jobs to run than the requested number of processors.  
 
-### Task Scheduling Behavior:
+### Task Scheduling Behavior
 
-  The launcher has three available behaviors for scheduling jobs, available
-  by setting the environment variable $LAUNCHER_SCHED:
-  (descriptions below assume k = task, p = num. procs, n = num. jobs)
+The launcher has three available behaviors for scheduling jobs, available by setting the environment variable `$LAUNCHER_SCHED`: (descriptions below assume k = task, p = num. procs, n = num. jobs)
 
-    * dynamic (default) - each task k executes first available unclaimed line
-    * interleaved - each task k executes every (k+p)th line
-    * block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
+* dynamic (default) - each task k executes first available unclaimed line
+* interleaved - each task k executes every (k+p)th line
+* block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
 
-Using the launcher with Intel Xeon Phi cards:
+### Using the launcher with Intel Xeon Phi cards
 
-  The launcher has the ability to execute appropriately compiled executables
-  natively on Intel Xeon Phi (MIC) cards.
+The launcher has the ability to execute appropriately compiled executables natively on Intel Xeon Phi (MIC) cards.
 
-  Available Environment Variables for Intel Xeon Phi execution:
+Available Environment Variables for Intel Xeon Phi execution:
 
-    * $LAUNCHER_NPHI is the number of Intel Xeon Phi cards per node.
-      This is set to zero (0) by default. Acceptable values are '1' and '2'.
+* $LAUNCHER_NPHI is the number of Intel Xeon Phi cards per node. This is set to zero (0) by default. Acceptable values are '1' and '2'.
+* $LAUNCHER_PHI_PPN is the number of processes per Intel Xeon Phi card.
+* $LAUNCHER_PHI_JOB_FILE is the file containing the jobs to run on the Intel Xeon Phi cards. 
 
-    * $LAUNCHER_PHI_PPN is the number of processes per Intel Xeon Phi card.
+### Job Submission
 
-    * $LAUNCHER_PHI_JOB_FILE is the file containing the jobs to run on the 
-      Intel Xeon Phi cards. 
-
-Job Submission:
-
-  Copy the example job submission script "launcher.<sched>" to your
+  Copy the example job submission script `launcher.<sched>` to your
   working directory to use as a starting point for interfacing with
   the desired batch system. Note that this script provides some simple
   error checking prior to the actual submission to aid in diagnosing
@@ -69,9 +57,6 @@ Job Submission:
 
   The directory containing this README contains several example submission
   scripts:
-
-	SGE:   launcher.sge
-        SLURM: launcher.slurm
-
---
-Last Update: 12/08/2015
+  
+  * SGE:   launcher.sge
+  * SLURM: launcher.slurm

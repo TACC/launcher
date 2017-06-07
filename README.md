@@ -1,4 +1,5 @@
-# Launcher: a simple utility for submitting multiple serial applications simultaneously 
+# Launcher
+Launcher is a utility for performing simple, data parallel, high throughput computing (HTC) workflows on clusters, massively parallel processor (MPP) systems, workgroups of computers, and personal machines.
 
 ## Quickstart
 
@@ -36,26 +37,23 @@ The launcher has three available behaviors for scheduling jobs, available by set
 * interleaved - each task k executes every (k+p)th line
 * block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
 
-## Using the launcher with Intel Xeon Phi cards
+## Using Launcher on Multi-/Many-core Processors
+Launcher uses the hwloc utility to determine layout of cores on the node. If hwloc is installed on your system and the commands are in the default `PATH`, Launcher will use this to partition the cores on node between the tasks. You can enabled task binding by setting `LAUNCHER_BIND=1` before calling `paramrun`.
 
-The launcher has the ability to execute appropriately compiled executables natively on Intel Xeon Phi (MIC) cards.
+## Using Launcher with Intel Xeon Phi (KNC) Co-processor Cards
+
+Launcher has the ability to execute appropriately compiled executables natively on first generation Intel Xeon Phi (KNC) cards.
 
 Available Environment Variables for Intel Xeon Phi execution:
 
-* $LAUNCHER_NPHI is the number of Intel Xeon Phi cards per node. This is set to zero (0) by default. Acceptable values are '1' and '2'.
-* $LAUNCHER_PHI_PPN is the number of processes per Intel Xeon Phi card.
-* $LAUNCHER_PHI_JOB_FILE is the file containing the jobs to run on the Intel Xeon Phi cards. 
+* `$LAUNCHER_NPHI` is the number of Intel Xeon Phi cards per node. This is set to zero (0) by default. Acceptable values are '1' and '2'.
+* `$LAUNCHER_PHI_PPN` is the number of processes per Intel Xeon Phi card.
+* `$LAUNCHER_PHI_JOB_FILE` is the file containing the jobs to run on the Intel Xeon Phi cards. 
 
 ## Job Submission
 
-  Copy the example job submission script `launcher.<sched>` to your
-  working directory to use as a starting point for interfacing with
-  the desired batch system. Note that this script provides some simple
-  error checking prior to the actual submission to aid in diagnosing
-  missing executables and misconfiguration.
+Copy the example job submission script `launcher.<sched>` to your working directory to use as a starting point for interfacing with the desired batch system. Note that this script provides some simple error checking prior to the actual submission to aid in diagnosing missing executables and misconfiguration.
 
-  The directory containing this README contains several example submission
-  scripts:
-  
+The directory containing this README contains several example submission scripts:
   * SGE:   launcher.sge
   * SLURM: launcher.slurm

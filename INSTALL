@@ -13,6 +13,8 @@ INSTALLATION NOTES
 
 3) If desired, add LAUNCHER_DIR to PATH.
 
+4) Dynamic scheduling (the default mode) requires Python 2.7 or greater
+
 RESOURCE MANAGER INTEGRATION
 
 If the launcher will be on a system managed by a resource manager, set LAUNCHER_RMI 

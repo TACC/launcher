@@ -13,7 +13,9 @@ INSTALLATION NOTES
 
 3) If desired, add LAUNCHER_DIR to PATH.
 
-4) Dynamic scheduling (the default mode) requires Python 2.7 or greater
+SOFTWARE DEPENDENCIES
+* Dynamic scheduling (the default mode) requires Python 2.7 or greater
+* Automatic core partitioning requires hwloc (https://www.open-mpi.org/projects/hwloc/)
 
 RESOURCE MANAGER INTEGRATION
 

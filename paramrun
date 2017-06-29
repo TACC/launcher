@@ -120,7 +120,7 @@ fi
 #Step 3: Ensure that LAUNCHER_JOB_FILE exists
 if [ -z $LAUNCHER_JOB_FILE ]
 then
-  lwarn WARNING "LAUNCHER_JOB_FILE not set."
+  lwarn ERROR "LAUNCHER_JOB_FILE not set."
   lexit
 else
   if [ -f $LAUNCHER_JOB_FILE ]
@@ -128,7 +128,8 @@ else
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
     if [ $LAUNCHER_NJOBS -eq 0 ]
     then
-      lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) is empty."
+      lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) is empty. This could be caused if the file is DOS formatted."
+      lwarn NOTICE "Consider using dos2unix on your file to convert the newline characters."
       lexit
     fi
   else

@@ -126,6 +126,11 @@ else
   if [ -f $LAUNCHER_JOB_FILE ]
   then
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
+    if [ $LAUNCHER_NJOBS -eq 0 ]
+    then
+      lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) is empty."
+      lexit
+    fi
   else
     lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) not found."
     lexit

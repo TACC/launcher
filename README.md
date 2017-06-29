@@ -1,6 +1,9 @@
 # Launcher
 Launcher is a utility for performing simple, data parallel, high throughput computing (HTC) workflows on clusters, massively parallel processor (MPP) systems, workgroups of computers, and personal machines.
 
+## Installing Launcher
+Launcher does not need to be compiled. Unpack the tarball or clone the repository in the desired directory. Then, set `LAUNCHER_DIR` to point to that location. Python 2.7 or greater and hwloc are required for full functionality. See INSTALL for more information.
+
 ## Quickstart
 
 * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.

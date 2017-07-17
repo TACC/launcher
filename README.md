@@ -27,7 +27,7 @@ The launcher defines the following environment variables for each job that is st
 * `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
 
 Example: If you want to redirect stdout to a file containing the unique ID of each line, you can specify the following in the paramlist file: ```a.out > out.o$LAUNCHER_JID```
-    
+
 If this particular execution instance of a.out was the first line in the job file, the output would be placed in the file "out.o1".
 
 Note: you can also use the launcher to run a sequence of serial jobs when you have more jobs to run than the requested number of processors.  
@@ -41,7 +41,7 @@ The launcher has three available behaviors for scheduling jobs, available by set
 * block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
 
 ## Using Launcher on Multi-/Many-core Processors
-Launcher uses the hwloc utility to determine layout of cores on the node. If hwloc is installed on your system and the commands are in the default `PATH`, Launcher will use this to partition the cores on node between the tasks. You can enabled task binding by setting `LAUNCHER_BIND=1` before calling `paramrun`.
+Launcher uses the hwloc utility to determine layout of cores on the node. If hwloc is installed on your system and the commands are in the default `PATH`, Launcher will use this to partition the cores on node between the tasks. You can enable task binding by setting `LAUNCHER_BIND=1` before calling `paramrun`.
 
 ## Using Launcher with Intel Xeon Phi (KNC) Co-processor Cards
 
@@ -51,7 +51,7 @@ Available Environment Variables for Intel Xeon Phi execution:
 
 * `$LAUNCHER_NPHI` is the number of Intel Xeon Phi cards per node. This is set to zero (0) by default. Acceptable values are '1' and '2'.
 * `$LAUNCHER_PHI_PPN` is the number of processes per Intel Xeon Phi card.
-* `$LAUNCHER_PHI_JOB_FILE` is the file containing the jobs to run on the Intel Xeon Phi cards. 
+* `$LAUNCHER_PHI_JOB_FILE` is the file containing the jobs to run on the Intel Xeon Phi cards.
 
 ## Job Submission
 

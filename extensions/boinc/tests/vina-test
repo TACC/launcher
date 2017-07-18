@@ -1,0 +1,1 @@
+./vina --receptor 2JLX_A_DENV_helicase_RNA_dock.pdbqt --ligand ZINC02884829-0000.pdbqt --center_x 30.0 --center_y -12.6 --center_z -5.8 --size_x 26.0 --size_y 26.0 --size_z 26.0 --exhaustiveness 8 --num_modes 2 --out outfile.pdbqt

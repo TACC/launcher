@@ -11,9 +11,19 @@ authors:
    affiliation: 1
  - name: John M. Fonner
    affiliation: 1
+ - name: Jason Allison
+   affiliation: 1
+ - name: Oscar Esteban
+   affiliation: 2
+ - name: Harry Kenya
+   affiliation: 1
+ - name: Marshall Lerner
+   affiliation: 1
 affiliations:
  - name: Texas Advanced Computing Center, The University of Texas at Austin
    index: 1
+ - name: Stanford University
+   index: 2
 date: 07 June 2017
 bibliography: paper.bib
 ---

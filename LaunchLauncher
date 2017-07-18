@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# This is a program that runs the Launcher program.
+
+echo "Hello, "$USER".  This script will run the Launcher program."
+
+echo -n "Have you already downloaded Launcher? y/n: "
+read -n 1 download
+echo
+while [ "$download" != "y" -a "$download" != "n" ]; do
+	echo -n "you did not enter an appropiate y or n. Please do so again: "
+done
+
+if [ "$download" ==  "n" ]; then
+	wget https://github.com/TACC/launcher/archive/v3.1.tar.gz
+	tar xzvf v3.1.tar.gz
+	tmplaunchdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	export LAUNCHER_DIR="$tmplaunchdir/launcher-3.1"
+elif [ "$download" == "y" ]; then
+	validDir=false
+
+	while [ "$validDir" == false ]; do
+		echo "Please enter the pathname to the directory that "
+		echo "contains the launcher files and press [ENTER]: "
+		read DIR
+		if [ ${#DIR} -lt 1 ]; then
+			echo "No parameters were given"
+			echo
+#		elif [ ! -e "$DIR" ]; then         
+#			echo "Directory does not exist!"
+#			echo
+		elif [ ! -d "$DIR" ]; then
+			echo "Not a Directory"
+			echo
+		else
+			validDir="true"
+			export LAUNCHER_DIR=$DIR
+		fi
+	done
+fi
+echo
+echo "Launcher can be used to execute anything which can be executed on the command line"
+echo "such as shell scripts, compiled programs, Python/R/Matlab, etc."
+echo "The list of jobs to be executed is placed in a text file"
+echo " one job per line, and no blank lines in between jobs."
+echo
+echo "Please enter your Launcher job file and then press [ENTER]: "
+read file
+export LAUNCHER_JOB_FILE=$file
+
+echo
+echo -n "What type of job scheduling would you like? dynamic (d) interleaved (i) block (b): "
+read -n 1 sched
+echo
+while [ "$sched" != "d" -a "$sched" != "i" -a "$sched" != "b" ]; do
+	echo -n "you did not enter an appropiate response. Please enter d, i, or b again: "
+done
+
+if [ "$sched" == "d" ]; then
+	export LAUNCHER_SCHED=dynamic
+elif [ "$sched" == "i" ]; then
+	export LAUNCHER_SCHED=interleaved
+else
+	export LAUNCHER_SCHED=block
+fi
+echo -n "The processes per node is automatically set to 4. Would you like to change that? y/n: "
+read -n 1 ppn
+echo
+while [ "$ppn" != "y" -a "$ppn" != "n" ]; do
+	echo -n "you did not enter an appropiate y or n. Please do so again: "
+done
+if [ "$ppn" ==  "n" ]; then
+	export LAUNCHER_PPN=4
+elif [ "$ppn" == "y" ]; then
+	validppn=false
+
+	while [ "$validppn" == false ]; do
+		echo "Please enter the amount of processes per node desired"
+		echo " (I don't recommend using more than 96 on a Wrangler node!) and then press [ENTER]: "
+		read numPPN
+		if expr "$numPPN" : '-\?[0-9]\+$' >/dev/null
+		then
+			validppn=true
+			export LAUNCHER_PPN=$numPPN
+		else
+
+			echo "No parameters or a wrong type of parameters were given"
+			echo
+		fi
+	done
+fi
+
+
+echo
+echo "Launcher will now be launched"
+time $LAUNCHER_DIR/paramrun

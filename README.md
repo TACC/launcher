@@ -12,6 +12,8 @@ Launcher does not need to be compiled. Unpack the tarball or clone the repositor
 
 ## Available Environment Variables
 
+Let's put a line in this file.
+
 You should set the following environment variables:
 
 * `$LAUNCHER_JOB_FILE` is the file containing the jobs to run in your parametric submission.

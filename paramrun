@@ -55,7 +55,7 @@ else
     source $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi
     export LAUNCHER_HOSTFILE=$LAUNCHER_RMI_HOSTFILE
   else
-    lwarn WARNING "Resource Manager Integration plugin file $LAUNCHER_RMI.rmi no found."
+    lwarn WARNING "Resource Manager Integration plugin file $LAUNCHER_RMI.rmi not found."
     lwarn "" "         Available options:"
     for rmi in `ls $LAUNCHER_PLUGIN_DIR/*.rmi 2>/dev/null` 
     do

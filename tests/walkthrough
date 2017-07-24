@@ -16,7 +16,9 @@ if [ "$download" ==  "n" ]; then
 	wget https://github.com/TACC/launcher/archive/v3.1.tar.gz
 	#this will need to be changed based on the version
 	tar xzvf v3.1.tar.gz
-	tmplaunchdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	# tmplaunchdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	#the one above is if we want it to be where the walkthrough is placed, not the new downloaded directory
+	tmplaunchdir=`pwd`
 	export LAUNCHER_DIR="$tmplaunchdir/launcher-3.1"
 	#this will need to be changed based on the version
 elif [ "$download" == "y" ]; then
@@ -27,7 +29,8 @@ elif [ "$download" == "y" ]; then
 		echo "or if this walkthrough is in the original place press enter: "
 		read DIR
 		if [ ${#DIR} -lt 1 ]; then
-			export LAUNCHER_DIR=`pwd`/..
+			export LAUNCHER_DIR="$(dirname "$(pwd)")"
+			echo $LAUNCHER_DIR
 			validDir=true
 			echo
 		elif [ ! -e "$DIR" ]; then
@@ -64,21 +67,30 @@ while [ "$validDir" == false ]; do
 	else
 		validDir="true"
 		export LAUNCHER_JOB_FILE=$file
+		echo
+		echo
+		echo
+		echo $LAUNCHER_JOB_FILE
+		echo
+		echo
 	fi
 done
 
 echo
-echo -n "What type of job scheduling would you like? dynamic (d) interleaved (i) block (b): "
+echo -n "What type of job scheduling would you like? dynamic (d) interleaved (i) block (b) or all (a): "
 read -n 1 sched
 echo
-while [ "$sched" != "d" -a "$sched" != "i" -a "$sched" != "b" -a "$sched" != "" ]; do
-	echo -n "you did not enter an appropiate response. Please enter d, i, or b again: "
+while [ "$sched" != "d" -a "$sched" != "i" -a "$sched" != "b" -a "$sched" != "" -a "$sched" != "a" ]; do
+	echo -n "you did not enter an appropiate response. Please enter d, i, b, or a again: "
+	read -n 1 sched
 done
 
 if [ "$sched" == "i" ]; then
 	export LAUNCHER_SCHED=interleaved
 elif [ "$sched" == "b" ]; then
 	export LAUNCHER_SCHED=block
+elif [ "$sched" == "a" ]; then
+	allSched=true
 else
 	export LAUNCHER_SCHED=dynamic
 fi
@@ -87,6 +99,7 @@ read -n 1 ppn
 echo
 while [ "$ppn" != "y" -a "$ppn" != "n" -a "$ppn" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 ppn
 done
 if [ "$ppn" ==  "n" -o "$ppn" == "" ]; then
 	export LAUNCHER_PPN=1
@@ -114,6 +127,7 @@ read -n 1 workDir
 echo
 while [ "$workDir" != "y" -a "$workDir" != "n" -a "$workDir" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 workDir
 done
 
 if [ "$workDir" == "y" ]; then
@@ -146,6 +160,7 @@ read -n 1 pluginDir
 echo
 while [ "$pluginDir" != "y" -a "$pluginDir" != "n" -a "$pluginDir" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 pluginDir
 done
 
 if [ "$pluginDir" == "y" ]; then
@@ -178,6 +193,7 @@ read -n 1 hostFile
 echo
 while [ "$hostFile" != "y" -a "$hostFile" != "n" -a "$hostFile" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 hostFile
 done
 
 if [ "$hostFile" == "y" ]; then
@@ -207,6 +223,7 @@ if [ ! -z $LAUNCHER_HOSTFILE ]; then
 	echo
 	while [ "$hostFile" != "y" -a "$hostFile" != "n" -a "$hostFile" != "" ]; do
 		echo -n "you did not enter an appropiate y or n. Please do so again: "
+		read -n 1 hostFile
 	done
 
 	if [ "$hostFile" == "y" ]; then
@@ -228,8 +245,32 @@ if [ ! -z $LAUNCHER_HOSTFILE ]; then
 	fi
 fi
 echo
+
+
+
 echo "Launcher will now be launched"
-$LAUNCHER_DIR/paramrun
+if [ "$allSched" == true ]; then
+	export LAUNCHER_SCHED=block
+	$LAUNCHER_DIR/paramrun > ./block.out
+	echo "block worked!"
+echo
+echo
+echo
+	export LAUNCHER_SCHED=interleaved
+	$LAUNCHER_DIR/paramrun > ./interleaved.out
+echo "interleaved worked!"
+echo
+echo
+echo
+	export LAUNCHER_SCHED=dynamic
+	$LAUNCHER_DIR/paramrun > ./dynamic.out
+echo "dyn worked!"
+echo
+echo
+echo
+else
+	$LAUNCHER_DIR/paramrun
+fi
 
 change="y"
 while [ "$change" == "y" ]; do

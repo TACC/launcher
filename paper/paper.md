@@ -43,7 +43,7 @@ Launcher is frequently used for:
 * Statistical analysis on unknown variables
 
 # Workflow
-Launcher uses a tree-based parallel startup mechanism (similar to MPI) to scatter jobs to multiple nodes/processors. The filesystem is used to gather data from separate tasks (typically into individual output files).
+Launcher uses a tree-based parallel startup mechanism (similar to MPI) to scatter jobs to multiple nodes/processors. The filesystem is used to gather data from separate tasks (typically into individual output files). Multiple launcher invocations can be chained together to perform pipelined analysis or to perform chained simulation/analysis workflows.
 
 ![launcher workflow](launcher_workflow.png "Launcher Workflow")
 

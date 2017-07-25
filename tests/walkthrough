@@ -4,12 +4,12 @@
 echo "Hello, "$USER".  This script will run the Launcher program."
 echo -n "Have you already downloaded Launcher? y/n: "
 read -n 1 download
-
 echo
-
+echo
 while [ $download != "y" -a $download != "n" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
 	read -n 1 download
+	echo
 done
 
 if [ "$download" ==  "n" ]; then
@@ -66,7 +66,7 @@ while [ "$validDir" == false ]; do
 		echo
 	elif [ -f $file ]; then
 		echo "Not a valid file. Please try again."
-		echo
+		read file
 	else
 		validDir="true"
 		export LAUNCHER_JOB_FILE=$file
@@ -83,6 +83,7 @@ echo
 while [ "$sched" != "d" -a "$sched" != "i" -a "$sched" != "b" -a "$sched" != "" -a "$sched" != "a" ]; do
 	echo -n "you did not enter an appropiate response. Please enter d, i, b, or a again: "
 	read -n 1 sched
+	echo
 done
 
 if [ "$sched" == "i" ]; then
@@ -100,6 +101,7 @@ echo
 while [ "$ppn" != "y" -a "$ppn" != "n" -a "$ppn" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
 	read -n 1 ppn
+	echo
 done
 if [ "$ppn" ==  "n" -o "$ppn" == "" ]; then
 	export LAUNCHER_PPN=1
@@ -116,8 +118,8 @@ elif [ "$ppn" == "y" ]; then
 			export LAUNCHER_PPN=$numPPN
 		else
 
-			echo "No parameters or a wrong type of parameters were given"
-			echo
+			echo "No parameters or a wrong type of parameters were given. Please try agian: "
+
 		fi
 	done
 fi
@@ -128,6 +130,7 @@ echo
 while [ "$workDir" != "y" -a "$workDir" != "n" -a "$workDir" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
 	read -n 1 workDir
+	echo
 done
 
 if [ "$workDir" == "y" ]; then
@@ -161,6 +164,7 @@ echo
 while [ "$pluginDir" != "y" -a "$pluginDir" != "n" -a "$pluginDir" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
 	read -n 1 pluginDir
+	echo
 done
 
 if [ "$pluginDir" == "y" ]; then
@@ -194,6 +198,7 @@ echo
 while [ "$hostFile" != "y" -a "$hostFile" != "n" -a "$hostFile" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
 	read -n 1 hostFile
+	echo
 done
 
 if [ "$hostFile" == "y" ]; then
@@ -224,6 +229,7 @@ if [ ! -z $LAUNCHER_HOSTFILE ]; then
 	while [ "$hostFile" != "y" -a "$hostFile" != "n" -a "$hostFile" != "" ]; do
 		echo -n "you did not enter an appropiate y or n. Please do so again: "
 		read -n 1 hostFile
+		echo
 	done
 
 	if [ "$hostFile" == "y" ]; then
@@ -251,20 +257,20 @@ echo
 echo "Launcher will now be launched"
 if [ "$allSched" == true ]; then
 	export LAUNCHER_SCHED=block
-	$LAUNCHER_DIR/paramrun > ./block.out
+	$LAUNCHER_DIR/paramrun
 	echo "block worked!"
 echo
 echo
 echo
 	export LAUNCHER_SCHED=interleaved
-	$LAUNCHER_DIR/paramrun > ./interleaved.out
+	$LAUNCHER_DIR/paramrun
 echo "interleaved worked!"
 echo
 echo
 echo
 	export LAUNCHER_SCHED=dynamic
-	$LAUNCHER_DIR/paramrun > ./dynamic.out
-echo "dyn worked!"
+	$LAUNCHER_DIR/paramrun
+echo "dynamic worked!"
 echo
 echo
 echo
@@ -275,12 +281,13 @@ fi
 change="y"
 while [ "$change" == "y" ]; do
 	echo
-	echo "Would you like to change any of the variables? y/n: "
+	echo -n "Would you like to change any of the variables? y/n: "
 	read -n 1 change
 	echo
 	while [ "$change" != "y" -a "$change" != "n" -a "$change" != "" ]; do
 		echo -n "you did not enter an appropiate y or n. Please do so again: "
 		read -n 1 change
+		echo
 	done
 	if [ "$change" == "y" ]; then
 		echo "enter your variable in the form export and then the variable name = new value"
@@ -292,9 +299,11 @@ while [ "$change" == "y" ]; do
 		while [ "$moreP" == "y" ]; do
 			echo -n "any other variables to change? y/n"
 			read -n 1 moreP
+			echo
 			while [ "$moreP" != "y" -a "$moreP" != "n" -a "$moreP" != "" ]; do
 				echo -n "you did not enter an appropiate y or n. Please do so again: "
 				read -n 1 moreP
+				echo
 			done
 			if [ "$moreP" == "y" ]; then
 				echo "Enter the change of the variables :"

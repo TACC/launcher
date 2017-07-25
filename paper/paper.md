@@ -34,4 +34,17 @@ high throughput computing (HTC) workflows on clusters, massively parallel proces
 and personal machines. It can be easily run from userspace or installed for system-wide use on shared resources. Launcher 
 will perform automatic process binding on multi-/many-core architectures where hwloc [@hwloc] is installed.
 
+# Use Cases
+Launcher is commonly used in situations where search or analysis of a large data space on independent points is required. 
+Launcher is frequently used for:
+* Sequence alignment scoring for many hundreds or thousands of DNA/RNA sequence pairs
+* Docking/scoring (protien/ligand dock scoring, drug/immunotherapy development, etc.)
+* Immune repetoire analysis
+* Statistical analysis on unknown variables
+
+# Workflow
+Launcher uses a tree-based parallel startup mechanism (similar to MPI) to scatter jobs to multiple nodes/processors. The filesystem is used to gather data from separate tasks (typically into individual output files).
+
+![launcher workflow](launcher_workflow.png "Launcher Workflow")
+
 # References

@@ -26,7 +26,10 @@ The launcher defines the following environment variables for each job that is st
 * `$LAUNCHER_PPN` contains the number of processes per node.
 * `$LAUNCHER_NJOBS` contains the number of jobs in your job file.
 * `$LAUNCHER_TSK_ID` is the particular processing core that the job is running on, from 0 to `$LAUNCHER_NPROCS-1`.
-* `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
+* `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`
+$LAUNCHER_JOB_FILE'
+the launcher job file is the specific directory where the specified output statement(s) is/are. Here you will find the file with the jobs that will run in the your 'parametric submission'.
+.
 
 Example: If you want to redirect stdout to a file containing the unique ID of each line, you can specify the following in the paramlist file: ```a.out > out.o$LAUNCHER_JID```
 

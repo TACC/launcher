@@ -4,6 +4,10 @@ Launcher is a utility for performing simple, data parallel, high throughput comp
 ## Installing Launcher
 Launcher does not need to be compiled. Unpack the tarball or clone the repository in the desired directory. Then, set `LAUNCHER_DIR` to point to that location. Python 2.7 or greater and hwloc are required for full functionality. See INSTALL for more information.
 
+## Verifying Installation
+
+Included in the download is a file called "quickstart" found in the folder "tests". In order to verify installation, open the command line and find the launcher file, and then type "cd tests" and then press the enter key. If the quickstart file is in the correct place, there is no need for arguments, so type "./quickstart". However, if the Launcher directory is found somewhere else, type "./quickstart <Launcher directory>". The script will run in the terminal and if there are no errors in the process, the last line will say "Launcher: Done. Job exited without errors".
+
 ## Quickstart
 
 * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.

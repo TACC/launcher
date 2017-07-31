@@ -258,22 +258,19 @@ echo "Launcher will now be launched"
 if [ "$allSched" == true ]; then
 	export LAUNCHER_SCHED=block
 	$LAUNCHER_DIR/paramrun
-	echo "block worked!"
-echo
-echo
-echo
+	echo
+	echo
+	echo
 	export LAUNCHER_SCHED=interleaved
 	$LAUNCHER_DIR/paramrun
-echo "interleaved worked!"
-echo
-echo
-echo
+	echo
+	echo
+	echo
 	export LAUNCHER_SCHED=dynamic
 	$LAUNCHER_DIR/paramrun
-echo "dynamic worked!"
-echo
-echo
-echo
+	echo
+	echo
+	echo
 else
 	$LAUNCHER_DIR/paramrun
 fi

@@ -5,4 +5,5 @@ before_script:
 
 script:
     - bash quicktest
+    - bash quicktest2
 #just to change something

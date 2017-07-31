@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "x$1" == "x" ]
+then
+  export LAUNCHER_DIR=../
+else
+  export LAUNCHER_DIR=$1
+fi
+
+export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/extras/examples/helloworldshort
+export LAUNCHER_SCHED=block
+export LAUNCHER_WORKDIR=`pwd`
+
+$LAUNCHER_DIR/paramrun

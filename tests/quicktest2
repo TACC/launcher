@@ -12,3 +12,7 @@ export LAUNCHER_SCHED=block
 export LAUNCHER_WORKDIR=`pwd`
 
 $LAUNCHER_DIR/paramrun
+
+export LAUNCHER_SCHED=interleaved
+
+$LAUNCHER_DIR/paramrun

@@ -1,11 +1,8 @@
 language: bash
 
 before_script:
-    - export LAUNCHER_DIR=`pwd`
-    - export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/tests/default_work_file
-    - export LAUNCHER_SCHED=interleaved
-    - export LAUNCHER_WORKDIR=`pwd`
+    - cd tests
 
 script:
-    - $LAUNCHER_DIR/paramrun
+    - bash quicktest
 #just to change something

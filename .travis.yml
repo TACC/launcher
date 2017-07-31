@@ -1,9 +1,4 @@
 language: bash
 
-before_script:
-    - cd tests
-
 script:
-    - bash quicktest
-    - bash quicktest2
-#just to change something
+    - bash .travis_test_file

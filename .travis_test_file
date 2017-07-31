@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ "x$1" == "x" ]
+then
+  export LAUNCHER_DIR=`pwd`
+else
+  export LAUNCHER_DIR=$1
+fi
+
+export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/tests/default_work_file
+export LAUNCHER_SCHED=block
+export LAUNCHER_WORKDIR=`pwd`
+$LAUNCHER_DIR/paramrun
+
+export LAUNCHER_PPN=15
+$LAUNCHER_DIR/paramrun
+
+export LAUNCHER_PPN=1
+export LAUNCHER_SCHED=interleaved
+$LAUNCHER_DIR/paramrun
+
+export LAUNCHER_PPN=20
+$LAUNCHER_DIR/paramrun
+
+export LAUNCHER_PPN=1
+export LAUNCHER_SCHED=dynamic
+$LAUNCHER_DIR/paramrun
+
+export LAUNCHER_PPN=20
+$LAUNCHER_DIR/paramrun

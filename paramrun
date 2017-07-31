@@ -19,6 +19,13 @@ function lexit {
   exit
 }
 
+#check if the program is running on a windows machine
+if grep -qE "(Microsoft|WSL)" /proc/version &> /dev/null ; then
+    windowsP=true
+else
+    windowsP=false
+fi
+
 if [ -z $LAUNCHER_DIR ]
 then
   lwarn ERROR "Launcher base directory LAUNCHER_DIR not set. Exiting."
@@ -159,10 +166,17 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   RETRY=0
   while [ $RUNNING == "false" ]
   do
-    $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME 9471 2>/dev/null &
-    LAUNCHER_DYN_PID=$!
-    disown $LAUNCHER_DYN_PID
-    sleep 1s
+    if [ $windowsP==true ]; then
+        $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS localhost 9471 2>/dev/null &
+        LAUNCHER_DYN_PID=$!
+        disown $LAUNCHER_DYN_PID
+        sleep 1s
+    else
+        $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME 9471 2>/dev/null &
+        LAUNCHER_DYN_PID=$!
+        disown $LAUNCHER_DYN_PID
+        sleep 1s  
+    fi
     if ! ps -p $! >/dev/null 2>/dev/null
     then
       if [ $RETRY -ne 10 ]
@@ -179,16 +193,30 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
     fi
   done
 
-  export LAUNCHER_DYN_COUNT="$HOSTNAME"
+
+  if [ $windowsP==true ]; then
+       export LAUNCHER_DYN_COUNT=localhost
+  else
+      export LAUNCHER_DYN_COUNT="$HOSTNAME"
+  fi
   export LAUNCHER_DYN_COUNT_PORT=9471
 
   if [ $LAUNCHER_USE_PHI -ne "0" ]; then
-    #Start another tskserver for the Intel Xeon Phi cards
-    $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
-    LAUNCHER_PHI_DYN_PID=$1
-    disown $LAUNCHER_PHI_DYN_PID
-    export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME"
-    export LAUNCHER_PHI_DYN_COUNT_PORT=9472
+    if [ $windowsP==true ]; then
+	#Start another tskserver for the Intel Xeon Phi cards
+        $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` localhost 9472 2>/dev/null &
+        LAUNCHER_PHI_DYN_PID=$1
+        disown $LAUNCHER_PHI_DYN_PID
+        export LAUNCHER_PHI_DYN_COUNT=localhost
+        export LAUNCHER_PHI_DYN_COUNT_PORT=9472
+    else
+	#Start another tskserver for the Intel Xeon Phi cards
+        $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
+        LAUNCHER_PHI_DYN_PID=$1
+        disown $LAUNCHER_PHI_DYN_PID
+        export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME"
+        export LAUNCHER_PHI_DYN_COUNT_PORT=9472
+    fi
   fi
 fi
 

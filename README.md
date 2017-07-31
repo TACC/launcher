@@ -1,9 +1,16 @@
 # Launcher
+[![Build Status](https://travis-ci.org/marshalllerner/launcher.svg?branch=master)](https://travis-ci.org/marshalllerner/launcher)
+[![status](http://joss.theoj.org/papers/7b5df63cd8a40f557d66051695d300a7/status.svg)](http://joss.theoj.org/papers/7b5df63cd8a40f557d66051695d300a7)
+
 Launcher is a utility for performing simple, data parallel, high throughput computing (HTC) workflows on clusters, massively parallel processor (MPP) systems, workgroups of computers, and personal machines.
+
 ## Installing Launcher
 Launcher does not need to be compiled. Unpack the tarball or clone the repository in the desired directory. Then, set `LAUNCHER_DIR` to point to that location. Python 2.7 or greater and hwloc are required for full functionality. See INSTALL for more information.
+
 ## Verifying Installation
+
 Included in the download is a file called "quickstart" found in the folder "tests". In order to verify installation, open the command line and find the launcher file, and then type "cd tests" and then press the enter key. If the quickstart file is in the correct place, there is no need for arguments, so type "./quickstart". However, if the Launcher directory is found somewhere else, type "./quickstart <Launcher directory>". The script will run in the terminal and if there are no errors in the process, the last line will say "Launcher: Done. Job exited without errors".
+
 ## Quickstart
 
 * Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.
@@ -11,8 +18,6 @@ Included in the download is a file called "quickstart" found in the folder "test
 * From the command-line or within your jobscript, run:`$LAUNCHER_DIR/paramrun`
 
 ## Available Environment Variables
-
-Let's put a line in this file.
 
 You should set the following environment variables:
 
@@ -26,13 +31,14 @@ The launcher defines the following environment variables for each job that is st
 * `$LAUNCHER_PPN` contains the number of processes per node.
 * `$LAUNCHER_NJOBS` contains the number of jobs in your job file.
 * `$LAUNCHER_TSK_ID` is the particular processing core that the job is running on, from 0 to `$LAUNCHER_NPROCS-1`.
-* `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`
+* `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
 
 Example: If you want to redirect stdout to a file containing the unique ID of each line, you can specify the following in the paramlist file: ```a.out > out.o$LAUNCHER_JID```
 
 If this particular execution instance of a.out was the first line in the job file, the output would be placed in the file "out.o1".
 
 Note: you can also use the launcher to run a sequence of serial jobs when you have more jobs to run than the requested number of processors.  
+
 ## Enviromental Variable descriptions
 * '$LAUNCHER_JOB_FILE' - The launcher job file is the specific directory where the specified output statement(s) is/are. Here you will find the file with the jobs that will run in the your 'parametric submission'.
 * 'LAUNCHER_WORKDIR' - This is simply the working directory. This directory will hold any relative path as well as the execution of launcher. In most cases, the working directory will be your home directory or your root users home directory.
@@ -73,4 +79,5 @@ The directory containing this README contains several example submission scripts
   * SLURM: launcher.slurm
 
 ## Referencing Launcher
-If you are using Launcher, please remember to make a reference to it when publishing results. The file `paper/paper.bib` contains the BibTeX-formatted citation list Please reference entry `Wilson:2014:LSF:2616498.2616533` (i.e., in LaTeX: `\cite{Wilson:2014:LSF:2616498.2616534}`).
+If you are using Launcher, please remember to make a reference to it when publishing results. The file `paper/paper.bib` contains the BibTeX-formatted citation list. Please reference entry `Wilson:2014:LSF:2616498.2616533` (i.e., in LaTeX: `\cite{Wilson:2014:LSF:2616498.2616534}`).
+

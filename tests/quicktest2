@@ -8,7 +8,11 @@ else
 fi
 
 export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/extras/examples/helloworldshort
-export LAUNCHER_SCHED=interleaved
+export LAUNCHER_SCHED=block
 export LAUNCHER_WORKDIR=`pwd`
+
+$LAUNCHER_DIR/paramrun
+
+export LAUNCHER_SCHED=interleaved
 
 $LAUNCHER_DIR/paramrun

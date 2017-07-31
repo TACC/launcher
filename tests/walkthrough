@@ -1,33 +1,39 @@
 #!/bin/bash
 
 # This is a program that runs the Launcher program.
-
 echo "Hello, "$USER".  This script will run the Launcher program."
-
-
 echo -n "Have you already downloaded Launcher? y/n: "
 read -n 1 download
 echo
-while [ "$download" != "y" -a "$download" != "n" ]; do
+echo
+while [ $download != "y" -a $download != "n" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 download
+	echo
 done
 
 if [ "$download" ==  "n" ]; then
 	wget https://github.com/TACC/launcher/archive/v3.1.tar.gz
+	#this will need to be changed based on the version
 	tar xzvf v3.1.tar.gz
-	tmplaunchdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	# tmplaunchdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	#the one above is if we want it to be where the walkthrough is placed, not the new downloaded directory
+	tmplaunchdir=`pwd`
 	export LAUNCHER_DIR="$tmplaunchdir/launcher-3.1"
+	#this will need to be changed based on the version
 elif [ "$download" == "y" ]; then
 	validDir=false
-
 	while [ "$validDir" == false ]; do
 		echo "Please enter the pathname to the directory that "
-		echo "contains the launcher files and press [ENTER]: "
+		echo "contains the launcher files and press the enter key,"
+		echo "or if this walkthrough is in the original place press enter: "
 		read DIR
 		if [ ${#DIR} -lt 1 ]; then
-			echo "No parameters were given"
+			export LAUNCHER_DIR="$(dirname "$(pwd)")"
+			echo $LAUNCHER_DIR
+			validDir=true
 			echo
-		elif [ ! -e "$DIR" ]; then         
+		elif [ ! -e "$DIR" ]; then
 			echo "Directory does not exist!"
 			echo
 		elif [ ! -d "$DIR" ]; then
@@ -49,39 +55,55 @@ echo
 validDir=false
 
 while [ "$validDir" == false ]; do
-	echo "Please enter your Launcher job file and then press [ENTER]: "
+	echo "Please enter your Launcher job file and then press enter, or"
+	echo " if you want to use a default one just press enter: "
 	read file
-	if [ -f $file ]; then
-		echo "Not a valid file. Please try again."
+	if [ ${#file} -lt 1 ]; then
+		export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/tests/default_work_file
+		validDir=true
 		echo
+		echo $LAUNCHER_JOB_FILE
+		echo
+	elif [ -f $file ]; then
+		echo "Not a valid file. Please try again."
+		read file
 	else
 		validDir="true"
-		export LAUNCHER_FILE=$file
+		export LAUNCHER_JOB_FILE=$file
+		echo
+		echo $LAUNCHER_JOB_FILE
+		echo
 	fi
 done
 
 echo
-echo -n "What type of job scheduling would you like? dynamic (d) interleaved (i) block (b): "
+echo -n "What type of job scheduling would you like? dynamic (d) interleaved (i) block (b) or all (a): "
 read -n 1 sched
 echo
-while [ "$sched" != "d" -a "$sched" != "i" -a "$sched" != "b" ]; do
-	echo -n "you did not enter an appropiate response. Please enter d, i, or b again: "
+while [ "$sched" != "d" -a "$sched" != "i" -a "$sched" != "b" -a "$sched" != "" -a "$sched" != "a" ]; do
+	echo -n "you did not enter an appropiate response. Please enter d, i, b, or a again: "
+	read -n 1 sched
+	echo
 done
 
-if [ "$sched" == "d" ]; then
-	export LAUNCHER_SCHED=dynamic
-elif [ "$sched" == "i" ]; then
+if [ "$sched" == "i" ]; then
 	export LAUNCHER_SCHED=interleaved
-else
+elif [ "$sched" == "b" ]; then
 	export LAUNCHER_SCHED=block
+elif [ "$sched" == "a" ]; then
+	allSched=true
+else
+	export LAUNCHER_SCHED=dynamic
 fi
 echo -n "The processes per node is automatically set to 1. Would you like to change that? y/n: "
 read -n 1 ppn
 echo
-while [ "$ppn" != "y" -a "$ppn" != "n" ]; do
+while [ "$ppn" != "y" -a "$ppn" != "n" -a "$ppn" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 ppn
+	echo
 done
-if [ "$ppn" ==  "n" ]; then
+if [ "$ppn" ==  "n" -o "$ppn" == "" ]; then
 	export LAUNCHER_PPN=1
 elif [ "$ppn" == "y" ]; then
 	validppn=false
@@ -96,8 +118,8 @@ elif [ "$ppn" == "y" ]; then
 			export LAUNCHER_PPN=$numPPN
 		else
 
-			echo "No parameters or a wrong type of parameters were given"
-			echo
+			echo "No parameters or a wrong type of parameters were given. Please try agian: "
+
 		fi
 	done
 fi
@@ -105,8 +127,10 @@ fi
 echo -n "Would you like to change the work directory? y/n: "
 read -n 1 workDir
 echo
-while [ "$workDir" != "y" -a "$workDir" != "n" ]; do
+while [ "$workDir" != "y" -a "$workDir" != "n" -a "$workDir" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 workDir
+	echo
 done
 
 if [ "$workDir" == "y" ]; then
@@ -119,7 +143,7 @@ if [ "$workDir" == "y" ]; then
 		if [ ${#DIR} -lt 1 ]; then
 			echo "No parameters were given"
 			echo
-		elif [ ! -e "$DIR" ]; then         
+		elif [ ! -e "$DIR" ]; then
 			echo "Directory does not exist!"
 			echo
 		elif [ ! -d "$DIR" ]; then
@@ -137,8 +161,10 @@ fi
 echo -n "Would you like to change the plugin directory? y/n: "
 read -n 1 pluginDir
 echo
-while [ "$pluginDir" != "y" -a "$pluginDir" != "n" ]; do
+while [ "$pluginDir" != "y" -a "$pluginDir" != "n" -a "$pluginDir" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 pluginDir
+	echo
 done
 
 if [ "$pluginDir" == "y" ]; then
@@ -151,7 +177,7 @@ if [ "$pluginDir" == "y" ]; then
 		if [ ${#DIR} -lt 1 ]; then
 			echo "No parameters were given"
 			echo
-		elif [ ! -e "$DIR" ]; then         
+		elif [ ! -e "$DIR" ]; then
 			echo "Directory does not exist!"
 			echo
 		elif [ ! -d "$DIR" ]; then
@@ -169,8 +195,10 @@ fi
 echo -n "Would you like to change the host file? y/n: "
 read -n 1 hostFile
 echo
-while [ "$hostFile" != "y" -a "$hostFile" != "n" ]; do
+while [ "$hostFile" != "y" -a "$hostFile" != "n" -a "$hostFile" != "" ]; do
 	echo -n "you did not enter an appropiate y or n. Please do so again: "
+	read -n 1 hostFile
+	echo
 done
 
 if [ "$hostFile" == "y" ]; then
@@ -183,7 +211,7 @@ if [ "$hostFile" == "y" ]; then
 		if [ ${#FILE} -lt 1 ]; then
 			echo "No parameters were given"
 			echo
-		elif [ ! -f "$FILE" ]; then         
+		elif [ ! -f "$FILE" ]; then
 			echo "File does not exist!"
 			echo
 		else
@@ -198,10 +226,12 @@ if [ ! -z $LAUNCHER_HOSTFILE ]; then
 	echo -n "Would you like to change the amount of hosts used in the host file? y/n: "
 	read -n 1 hostFile
 	echo
-	while [ "$hostFile" != "y" -a "$hostFile" != "n" ]; do
+	while [ "$hostFile" != "y" -a "$hostFile" != "n" -a "$hostFile" != "" ]; do
 		echo -n "you did not enter an appropiate y or n. Please do so again: "
+		read -n 1 hostFile
+		echo
 	done
-	
+
 	if [ "$hostFile" == "y" ]; then
 		validNum=false
 
@@ -221,18 +251,40 @@ if [ ! -z $LAUNCHER_HOSTFILE ]; then
 	fi
 fi
 echo
+
+
+
 echo "Launcher will now be launched"
-$LAUNCHER_DIR/paramrun
+if [ "$allSched" == true ]; then
+	export LAUNCHER_SCHED=block
+	$LAUNCHER_DIR/paramrun
+	echo
+	echo
+	echo
+	export LAUNCHER_SCHED=interleaved
+	$LAUNCHER_DIR/paramrun
+	echo
+	echo
+	echo
+	export LAUNCHER_SCHED=dynamic
+	$LAUNCHER_DIR/paramrun
+	echo
+	echo
+	echo
+else
+	$LAUNCHER_DIR/paramrun
+fi
 
 change="y"
 while [ "$change" == "y" ]; do
 	echo
-	echo "Would you like to change any of the variables? y/n: "
+	echo -n "Would you like to change any of the variables? y/n: "
 	read -n 1 change
 	echo
-	while [ "$change" != "y" -a "$change" != "n" ]; do
+	while [ "$change" != "y" -a "$change" != "n" -a "$change" != "" ]; do
 		echo -n "you did not enter an appropiate y or n. Please do so again: "
 		read -n 1 change
+		echo
 	done
 	if [ "$change" == "y" ]; then
 		echo "enter your variable in the form export and then the variable name = new value"
@@ -244,9 +296,11 @@ while [ "$change" == "y" ]; do
 		while [ "$moreP" == "y" ]; do
 			echo -n "any other variables to change? y/n"
 			read -n 1 moreP
-			while [ "$moreP" != "y" -a "$moreP" != "n" ]; do
+			echo
+			while [ "$moreP" != "y" -a "$moreP" != "n" -a "$moreP" != "" ]; do
 				echo -n "you did not enter an appropiate y or n. Please do so again: "
 				read -n 1 moreP
+				echo
 			done
 			if [ "$moreP" == "y" ]; then
 				echo "Enter the change of the variables :"

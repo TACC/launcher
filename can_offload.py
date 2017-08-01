@@ -18,6 +18,7 @@ def can_offload(fileName):
             if any(possibilities in libArr[lineNum] for possibilities in ("/lib/", "/lib64/", "/usr/")):
                 continue
             raise DynamicExeException("%s contains more than just standard libraries %s" %(fileName, libArr[lineNum]))
+            return False
         return True
     else:
         return False

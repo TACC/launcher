@@ -1,4 +1,5 @@
 # Launcher
+[![Build Status](https://travis-ci.org/marshalllerner/launcher.svg?branch=master)](https://travis-ci.org/marshalllerner/launcher)
 [![status](http://joss.theoj.org/papers/7b5df63cd8a40f557d66051695d300a7/status.svg)](http://joss.theoj.org/papers/7b5df63cd8a40f557d66051695d300a7)
 
 Launcher is a utility for performing simple, data parallel, high throughput computing (HTC) workflows on clusters, massively parallel processor (MPP) systems, workgroups of computers, and personal machines.
@@ -38,6 +39,16 @@ If this particular execution instance of a.out was the first line in the job fil
 
 Note: you can also use the launcher to run a sequence of serial jobs when you have more jobs to run than the requested number of processors.  
 
+## Enviromental Variable descriptions
+* '$LAUNCHER_JOB_FILE' - The launcher job file is the specific directory where the specified output statement(s) is/are. Here you will find the file with the jobs that will run in the your 'parametric submission'.
+* 'LAUNCHER_WORKDIR' - This is simply the working directory. This directory will hold any relative path as well as the execution of launcher. In most cases, the working directory will be your home directory or your root users home directory.
+* 'LAUNCHER_NPROCS' - In your parametric submissions, there are processes that are running. This variable stores the number of processes that are simultaneously running in your submissions . It can simply be stated as the total processes. In this example, when keeping variables their default vales, the value will be 1.
+* '$LAUNCHER_NHOSTS' - Just as launcher_nprocs holds the number of processes running simultaneously, this variable contains the number of hosts that are running in your submission simultaneously.
+* '$LAUNCHER_PPN' - This is the number of processors used while running the program. Changing the number of processors is an easy way to increase or decrease the time spent running the program. The default for this variable is 1.
+* '$LAUNCHER_NJOBS' - This variable is simply the total number of jobs. If only one job is being run, then the variable value is 1. 
+* '$LAUNCHER_TSK_ID' - When running the program, this variable is a number from 0 to 'launcher_nprocs-1' which represents the processing core on which the job is running.
+* '$LAUNCHER_JID' - Numbered from 1 to the variable 'launcher_njobs', this variable is an active representation of the job instance currently running in the problem.
+
 ## Task Scheduling Behavior
 
 The launcher has three available behaviors for scheduling jobs, available by setting the environment variable `$LAUNCHER_SCHED`: (descriptions below assume k = task, p = num. procs, n = num. jobs)
@@ -69,3 +80,4 @@ The directory containing this README contains several example submission scripts
 
 ## Referencing Launcher
 If you are using Launcher, please remember to make a reference to it when publishing results. The file `paper/paper.bib` contains the BibTeX-formatted citation list. Please reference entry `Wilson:2014:LSF:2616498.2616533` (i.e., in LaTeX: `\cite{Wilson:2014:LSF:2616498.2616534}`).
+

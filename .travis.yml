@@ -1,11 +1,8 @@
-language: python
-python: 
-    - "2.7"
-    - "2.7"
-    - "3.2"
-    - "3.3"
-    - "3.4"
-    - "3.5"
+language: bash
 
-# install: "pip install -r requirements.txt"
-# script: py.test
+os:
+  - linux
+  - osx
+
+script:
+    - bash .travis_test_file

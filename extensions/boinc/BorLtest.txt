@@ -1,0 +1,8 @@
+
+echo "hello"
+/tests/vina 1 2 3
+tests/vina 1 2 3
+ech "hello"
+
+ld
+ls

@@ -7,12 +7,16 @@ import commands
 class DynamicNonStandardException(Exception): #change this exception depending on what the actual error is for
     pass
 
+class CommandNotFoundException(Exception): #if the command is not found
+    pass
+
 def can_offload(fileName):
     try:
-        if "ELF" in subprocess.check_output(["file", fileName]):
+        good_path = subprocess.check_output(["which", fileName])[:-1]
+        if "ELF" in subprocess.check_output(["file", good_path]):
             #os.access(fileName, os.X_OK)
             try:
-                libs = subprocess.check_output(["ldd", fileName])
+                libs = subprocess.check_output(["ldd", good_path])
             except subprocess.CalledProcessError:
                 return True
             libArr = libs.split("\n")
@@ -26,4 +30,4 @@ def can_offload(fileName):
         else:
             return False
     except subprocess.CalledProcessError:
-        return False
+        raise CommandNotFoundException("Command was not found")

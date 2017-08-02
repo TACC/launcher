@@ -11,11 +11,14 @@ else:
     bout = open("BOINCcommands.txt", "w")
     lout = open("launchercommands.txt", "w")
     for line in file_object.readlines():
-        print(line)
-        if can_offload(line.split()[0]):
-            bout.write(line)
-        else:
-            lout.write(line)
-
+        try:
+            if can_offload(line.split()[0]):
+                bout.write(line)
+            else:
+                lout.write(line)
+        except IndexError:
+            print("There was a line with no command. Skipping this line.")
+        except CommandNotFoundException:
+            print("The line `%s` contained an error with the command. Skipping this line." %line[:-1])
 bout.close()
 lout.close()

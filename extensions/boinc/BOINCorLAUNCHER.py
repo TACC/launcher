@@ -19,6 +19,6 @@ else:
     except IndexError:
       print("There was a line with no command. Skipping this line.")
     except CommandNotFoundException:
-      print("The line `%s` contained an error with the command. Skipping this line." %line[:-1])
+      print("The line `{}` contained an error with the command. Skipping this line.".format(line[:-1]))
 bout.close()
 lout.close()

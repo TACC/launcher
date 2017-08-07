@@ -11,9 +11,10 @@ import uuid
 import getpass
 import hashlib
 
-# hsub: Submission script for the Herd Volunteer Computing Project
+# hsub: Submission script for the Herd Volunteer Computing Project and Launcher on Stampede2
 # lwilson - TACC
-# Usage: hsub <launcher_job_file>
+# Marshall Lerner
+# Usage: start_launcher_BOINC <job_file>
 
 class DynamicNonStandardException(Exception): #change this exception depending on what the actual error is for
   pass
@@ -21,7 +22,9 @@ class DynamicNonStandardException(Exception): #change this exception depending o
 class CommandNotFoundException(Exception): #if the command is not found
   pass
 
-
+# Used to hash the title according to the contents of the file. If two files
+# have the same contents but not the same title, their hashes will be the same.
+# If the two files have the same name but not contents, their hashes will be different.
 def md5(fname):
   hash_md5 = hashlib.md5()
   with open(fname, "rb") as f:
@@ -29,6 +32,16 @@ def md5(fname):
       hash_md5.update(chunk)
   return hash_md5.hexdigest()
 
+# Used to see if a job can be offloaded to BOINC by looking at the command
+# (e.g. "echo" from "echo 'Hello World'", "./start_launcher_BOINC" from
+# "./start_launcher_BOINC <Job_File>"). The offloadable jobs are static
+# executables that are in ELF format and dynamic executables that only contain
+# standard libraries (/lib, /lib64, and/or /usr)
+#
+# param fileName - a string containing a single command line job (e.g. "echo 'Hello World'")
+#
+# returns true or false depending on if the job can be offloaded to BOINC, and
+# raises an error if there is no command on the specific inputted line
 def can_offload(fileName):
   try:
     good_path = subprocess.check_output(["which", fileName])[:-1]
@@ -52,13 +65,13 @@ def can_offload(fileName):
     raise CommandNotFoundException("Command was not found")
 
 
-
+#checks if the user inputted a job file or too many files
 if len(sys.argv) < 2 or len(sys.argv) > 2:
   print "Usage: hsub <launcher_job_file>" #TODO change "hsub"
   raise EnvironmentError("Too many or not enough variables. Exiting")
   exit(1)
 
-
+# TODO tracking different users and their authorization code
 project_url = 'https://herd.tacc.utexas.edu/'
 project_auth = '1f289518a167969cc67523ba7d5ced8a'
 
@@ -94,7 +107,7 @@ ufr.boinc_names = []
 print("The program will now determine which files can be offloaded to VAST and which to launcher")
 print
 file_object = open(sys.argv[1])
-bout = open("VASTjobs.txt", "w")
+bout = open("VASTjobs.txt", "w") # TODO: VAST or BOINC
 lout = open("LAUNCHERjobs.txt", "w")
 for line in file_object.readlines():
   try:
@@ -181,8 +194,9 @@ for line in file_object.readlines():
 bout.close()
 lout.close()
 
+# offloading files to BOINC
 print
-print("Starting BOINC")
+print("Starting BOINC") #TODO: BOINC or VAST
 print
 ufrr = submit_api.upload_files(ufr)
 if ufrr[0].tag == 'error':
@@ -191,8 +205,8 @@ if ufrr[0].tag == 'error':
 r = submit_api.submit_batch(batch)
 print r[0].tag, r[0].find('error_msg').text
 
-
-if os.statfi("launchercommands.txt").st_size != 0:
+# offloading files to Launcher if there are any commands in the file
+if os.statfi("LAUNCHERjobs.txt").st_size != 0:
   print
   print("starting launcher")
   print
@@ -200,12 +214,13 @@ if os.statfi("launchercommands.txt").st_size != 0:
   slurm.write("#!/bin/bash\n\n#SBATCH -J non-herd_files\n#SBATCH -o non-herd_files.o%j\n")
   slurm.write("#SBATCH -e non-herd_files.e%j\n#SBATCH -p normal\n#SBATCH -N 4\n")
   slurm.write("#SBATCH -n 32\n#SBATCH -t 01:30:00\n\nmodule reset\nmodule list\n")
-  slurm.write("pwd\ndate\n\nexport LAUNCHER_JOB_FILE=" + os.getenv('LAUNCHER_DIR', os.path.abspath(os.path.join(__file__ ,"../"))) + "/launchercommands.txt\n")
+  slurm.write("pwd\ndate\n\nexport LAUNCHER_JOB_FILE=" + os.getenv('LAUNCHER_DIR', os.path.abspath(os.path.join(__file__ ,"../"))) + "/LAUNCHERjobs.txt\n")
   slurm.write("ibrun " + os.getenv('LAUNCHER_DIR', os.path.abspath(os.path.join(__file__ ,"../../.."))) + "/paramrun")
   # TODO actually logging into launcher or stampede to load the file.
   exit()
 else:
   print
-  print("There were no jobs necessary to be run on launcher. Exiting...")
+  print("There were no jobs necessary to be run on launcher. Deleting the LAUNCHERjobs file and exiting...")
   print
+  os.remove("LAUNCHERjobs.txt")
   exit()

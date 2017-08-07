@@ -184,15 +184,15 @@ lout.close()
 print
 print("Starting BOINC")
 print
-#ufrr = submit_api.upload_files(ufr)
-#if ufrr[0].tag == 'error':
-#  print 'error: ', ufrr[0].find('error_msg').text
+ufrr = submit_api.upload_files(ufr)
+if ufrr[0].tag == 'error':
+  print 'error: ', ufrr[0].find('error_msg').text
 
-#r = submit_api.submit_batch(batch)
-#print r[0].tag, r[0].find('error_msg').text
+r = submit_api.submit_batch(batch)
+print r[0].tag, r[0].find('error_msg').text
 
 
-if os.stat("launchercommands.txt").st_size != 0:
+if os.statfi("launchercommands.txt").st_size != 0:
   print
   print("starting launcher")
   print

@@ -27,14 +27,14 @@ if len(sys.argv) <= 1:
   print "Usage: hsub <launcher_job_file>"
   exit()
 
-project_url = 'http://herd.tacc.utexas.edu/tacctest/'
+project_url = 'https://herd.tacc.utexas.edu/'
 project_auth = '1f289518a167969cc67523ba7d5ced8a'
 
 
 # Setup the batch
 breq = submit_api.CREATE_BATCH_REQ()
 breq.project = project_url
-breq.authenticator = project_auth 
+breq.authenticator = project_auth
 breq.app_name = "herd"
 breq.batch_name = "herd-{}-{}".format(getpass.getuser(),uuid.uuid4())
 breq.expire_time = 0
@@ -82,7 +82,7 @@ for wu in job_file:
   file_info = ""
   wu_args=wu.split()
   if wu_args[0] == "./vina":
-    #This is our current candidate.   
+    #This is our current candidate.
     f = submit_api.FILE_DESC()
     f.mode = 'local_staged'
     #TODO: Get the full path here
@@ -129,7 +129,7 @@ for wu in job_file:
         <open_name>{}</open_name>
         </file_ref>
 """.format(a)
-        
+
 
     job.wu_template = """<input_template>
                       {}

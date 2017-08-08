@@ -1,0 +1,226 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import subprocess
+import commands
+import copy
+import submit_api
+import random
+import uuid
+import getpass
+import hashlib
+
+# hsub: Submission script for the Herd Volunteer Computing Project and Launcher on Stampede2
+# lwilson - TACC
+# Marshall Lerner
+# Usage: start_launcher_BOINC <job_file>
+
+class DynamicNonStandardException(Exception): #change this exception depending on what the actual error is for
+  pass
+
+class CommandNotFoundException(Exception): #if the command is not found
+  pass
+
+# Used to hash the title according to the contents of the file. If two files
+# have the same contents but not the same title, their hashes will be the same.
+# If the two files have the same name but not contents, their hashes will be different.
+def md5(fname):
+  hash_md5 = hashlib.md5()
+  with open(fname, "rb") as f:
+    for chunk in iter(lambda: f.read(4096), b""):
+      hash_md5.update(chunk)
+  return hash_md5.hexdigest()
+
+# Used to see if a job can be offloaded to BOINC by looking at the command
+# (e.g. "echo" from "echo 'Hello World'", "./start_launcher_BOINC" from
+# "./start_launcher_BOINC <Job_File>"). The offloadable jobs are static
+# executables that are in ELF format and dynamic executables that only contain
+# standard libraries (/lib, /lib64, and/or /usr)
+#
+# param fileName - a string containing a single command line job (e.g. "echo 'Hello World'")
+#
+# returns true or false depending on if the job can be offloaded to BOINC, and
+# raises an error if there is no command on the specific inputted line
+def can_offload(fileName):
+  try:
+    good_path = subprocess.check_output(["which", fileName])[:-1]
+    if "ELF" in subprocess.check_output(["file", good_path]):
+      #os.access(fileName, os.X_OK)
+      try:
+        libs = subprocess.check_output(["ldd", good_path])
+      except subprocess.CalledProcessError:
+        return True
+      libArr = libs.split("\n")
+      for lineNum in range(1, len(libArr) - 1):
+        if any(possibilities in libArr[lineNum] for possibilities in ("/lib/", "/lib64/", "/usr/")):
+          continue
+      #    raise DynamicNonStandardException("%s contains more than just standard libraries %s" %(fileName, libArr[lineNum]))
+      #   I wasn't sure if there should be an error thrown or it should just return false.
+        return False
+      return True
+    else:
+      return False
+  except subprocess.CalledProcessError:
+    raise CommandNotFoundException("Command was not found")
+
+
+#checks if the user inputted a job file or too many files
+if len(sys.argv) < 2 or len(sys.argv) > 2:
+  print "Usage: hsub <launcher_job_file>" #TODO change "hsub"
+  raise EnvironmentError("Too many or not enough variables. Exiting")
+  exit(1)
+
+# TODO tracking different users and their authorization code
+project_url = 'https://herd.tacc.utexas.edu/'
+project_auth = '1f289518a167969cc67523ba7d5ced8a'
+
+# Setup the batch
+breq = submit_api.CREATE_BATCH_REQ()
+breq.project = project_url
+breq.authenticator = project_auth
+breq.app_name = "herd"
+breq.batch_name = "herd-{}-{}".format(getpass.getuser(),uuid.uuid4())
+breq.expire_time = 0
+br = submit_api.create_batch(breq)
+if br.tag == 'error':
+  print 'ERROR: Unable to create batch: ', br.find('error_msg').text
+  sys.exit()
+batch_id = int(br.find('batch_id').text)
+print "hsub: Creating herd batch (id={}, name={})...".format(batch_id, breq.batch_name)
+batch = submit_api.BATCH_DESC()
+batch.project = project_url
+batch.authenticator = project_auth
+batch.app_name = "herd"
+batch.batch_id = batch_id
+batch.jobs = []
+
+# Setup the upload request object
+ufr = submit_api.UPLOAD_FILES_REQ()
+ufr.project = project_url
+ufr.authenticator = project_auth
+ufr.batch_id = batch_id
+ufr.local_names = []
+ufr.boinc_names = []
+
+#Iterate through the job file
+print("The program will now determine which files can be offloaded to VAST and which to launcher")
+print
+file_object = open(sys.argv[1])
+bout = open("VASTjobs.txt", "w") # TODO: VAST or BOINC
+lout = open("LAUNCHERjobs.txt", "w")
+for line in file_object.readlines():
+  try:
+    wu_args=line.split
+    if can_offload(wu_args[0]):
+      f = submit_api.FILE_DESC()
+      f.mode = 'local_staged'
+      good_path = subprocess.check_output(["which", wu_args[0]])[:-1]
+      m5h = md5(good_path)
+      f.source = "{}_{}".format(m5h,good_path)
+      job.files.append(copy.copy(f))
+      ufr.local_names.append(good_path)
+      ufr.boinc_names.append(f.source)
+      file_info = file_info + """<file_info>
+  <sticky/>
+  <no_delete/>
+  </file_info>
+  """
+      file_ref = file_ref + """<file_ref>
+  <open_name>{}</open_name>
+  </file_ref>
+  """.format(good_path)
+
+      job.rsc_fpops_est = 1e10 #TODO idk what this is
+
+      #Identify input files
+      for a in wu_args[1:5]: #TODO: how many arguments should be the maximum?
+        if a.startswith("--"):
+          #This is an argument flag, ignore
+          pass
+        else:
+          # Describe files for the job
+          f = submit_api.FILE_DESC()
+          f.mode = 'local_staged'
+          m5h = md5(a)
+          f.source = "{}_{}".format(m5h,a)
+          job.files.append(copy.copy(f))
+
+          # Establish file info for upload
+          ufr.local_names.append(a)
+          ufr.boinc_names.append("{}_{}".format(m5h,a))
+
+          # Add file_ref to input_template
+          file_info = file_info + """<file_info>
+  </file_info>
+  """
+          file_ref = file_ref + """
+          <file_ref>
+          <open_name>{}</open_name>
+          </file_ref>
+  """.format(a)
+
+
+      job.wu_template = """<input_template>
+                        {}
+                        <workunit>
+                        {}
+                        <command_line><![CDATA[{}]]></command_line>
+                        <rsc_disk_bound>5000000000.00</rsc_disk_bound>
+                        </workunit>
+                        </input_template>""".format(file_info,file_ref,wu.rstrip())
+
+      job.result_template="""<output_template>
+      <file_info>
+        <name><OUTFILE_0/></name>
+        <generated_locally/>
+        <max_nbytes>50000000</max_nbytes>
+        <url><UPLOAD_URL/></url>
+      </file_info>
+      <result>
+        <file_name><OUTFILE_0/></file_name>
+        <open_name>outfile.pdbqt</open_name>
+      </result>
+      </output_template>"""
+      batch.jobs.append(copy.copy(job))
+
+      bout.write(line)
+    else:
+      lout.write(line)
+  except IndexError:
+    print("There was a line with no command. Skipping this line.")
+  except CommandNotFoundException:
+    print("The line `{}` contained an error with the command. Skipping this line.".format(line[:-1]))
+bout.close()
+lout.close()
+
+# offloading files to BOINC
+print
+print("Starting BOINC") #TODO: BOINC or VAST
+print
+ufrr = submit_api.upload_files(ufr)
+if ufrr[0].tag == 'error':
+  print 'error: ', ufrr[0].find('error_msg').text
+
+r = submit_api.submit_batch(batch)
+print r[0].tag, r[0].find('error_msg').text
+
+# offloading files to Launcher if there are any commands in the file
+if os.statfi("LAUNCHERjobs.txt").st_size != 0:
+  print
+  print("starting launcher")
+  print
+  slurm = open("launcher_slurm.sh", "w")
+  slurm.write("#!/bin/bash\n\n#SBATCH -J non-herd_files\n#SBATCH -o non-herd_files.o%j\n")
+  slurm.write("#SBATCH -e non-herd_files.e%j\n#SBATCH -p normal\n#SBATCH -N 4\n")
+  slurm.write("#SBATCH -n 32\n#SBATCH -t 01:30:00\n\nmodule reset\nmodule list\n")
+  slurm.write("pwd\ndate\n\nexport LAUNCHER_JOB_FILE=" + os.getenv('LAUNCHER_DIR', os.path.abspath(os.path.join(__file__ ,"../"))) + "/LAUNCHERjobs.txt\n")
+  slurm.write("ibrun " + os.getenv('LAUNCHER_DIR', os.path.abspath(os.path.join(__file__ ,"../../.."))) + "/paramrun")
+  # TODO actually logging into launcher or stampede to load the file.
+  exit()
+else:
+  print
+  print("There were no jobs necessary to be run on launcher. Deleting the LAUNCHERjobs file and exiting...")
+  print
+  os.remove("LAUNCHERjobs.txt")
+  exit()

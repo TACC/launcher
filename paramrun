@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function lwarn {
-  if [[ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]]
+  if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
   then
     date +"$1 (%D %T): $2" >&2
   else
@@ -10,7 +10,7 @@ function lwarn {
 }
 
 function lexit {
-  if [[ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]]
+  if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
   then
     echo "Launcher exited without completing."
   else
@@ -146,7 +146,7 @@ else
 fi
 
 #Step 4: Setup Xeon Phi support
-if [[ "x$LAUNCHER_NPHI" == "x" -o "x$LAUNCHER_NPHI" == "x0" ]]
+if [ "x$LAUNCHER_NPHI" == "x" -o "x$LAUNCHER_NPHI" == "x0" ]
 then
   LAUNCHER_USE_PHI=0
 else
@@ -164,9 +164,9 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
   #Start tskserver
   RUNNING="false"
   RETRY=0
-  while [[ $RUNNING == "false" ]]
+  while [[ "$RUNNING" == "false" ]]
   do
-    if [[ $windowsP==true ]]; then
+    if [[ "$windowsP" == "true" ]]; then
         $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS localhost 9471 2>/dev/null &
         LAUNCHER_DYN_PID=$!
         disown $LAUNCHER_DYN_PID
@@ -194,7 +194,7 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
   done
 
 
-  if [[ $windowsP==true ]]; then
+  if [[ "$windowsP" == "true" ]]; then
        export LAUNCHER_DYN_COUNT=localhost
   else
       export LAUNCHER_DYN_COUNT="$HOSTNAME"

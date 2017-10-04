@@ -103,7 +103,7 @@ while [[ $COMPLETE == "false" ]]; do
 
   if [[ $LAUNCHER_SCHED == "interleaved" ]]; then
     export LAUNCHER_JID=`expr $LAUNCHER_JID + $LAUNCHER_NPROCS`
-    if [[ "x$LAUNCHER_JID" == "x" -o $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]]; then
+    if [ "x$LAUNCHER_JID" == "x" -o $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]; then
       COMPLETE="true"
     fi
   elif [[ $LAUNCHER_SCHED == "block" ]]; then
@@ -113,12 +113,12 @@ while [[ $COMPLETE == "false" ]]; do
     fi
   else
     RETRY=0
-    while [[ $RETRY -lt 3 ]]
+    while [[ "$RETRY" -lt 3 ]]
     do
       export LAUNCHER_JID=`$NETCAT_CMD $LAUNCHER_DYN_SRV`
       if [[ "x$LAUNCHER_JID" == "x" ]]
       then
-        if [[ $RETRY -lt 3 ]]
+        if [[ "$RETRY" -lt 3 ]]
         then
           echo "WARNING: No response from dynamic task server. Retrying..."
           RETRY=`expr $RETRY + 1`

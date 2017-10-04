@@ -64,7 +64,7 @@ Available Environment Variables for Intel Xeon Phi execution:
 
 Copy the example job submission script `launcher.<sched>` to your working directory to use as a starting point for interfacing with the desired batch system. Note that this script provides some simple error checking prior to the actual submission to aid in diagnosing missing executables and misconfiguration.
 
-The directory containing this README contains several example submission scripts:
+The launcher/extras/batch-scripts directory contains several example submission scripts:
   * SGE:   launcher.sge
   * SLURM: launcher.slurm
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 #------------------------------------------------
-# Simple serial job launcher for TACC systems 
+# Simple serial job launcher for TACC systems
 #
 # 9/9/2006 - l.wilson
 # 1/21/2011 - l.wilson - Modified to spawn only
@@ -14,9 +14,9 @@
 
 NETCAT_CMD="nc ${LAUNCHER_NETCAT_FLAGS}"
 
-if [ "x$LAUNCHER_JOB_FILE" == "x" ]
+if [[ "x$LAUNCHER_JOB_FILE" == "x" ]]
 then
-  if [ "$LAUNCHER_ON_PHI" == "1" ];then
+  if [[ "$LAUNCHER_ON_PHI" == "1" ]];then
     cd $5
     export LAUNCHER_JOB_FILE="$6"
   else
@@ -25,20 +25,20 @@ then
   fi
 fi
 
-if [ "x$LAUNCHER_JNOBS" == "x" ]
+if [[ "x$LAUNCHER_JNOBS" == "x" ]]
 then
   export LAUNCHER_NJOBS=`cat $LAUNCHER_JOB_FILE | wc -l`
 fi
 
-if [ "$LAUNCHER_ON_PHI" == "1" ];then
+if [[ "$LAUNCHER_ON_PHI" == "1" ]];then
   LAUNCHER_DYN_SRV="$LAUNCHER_PHI_DYN_COUNT $LAUNCHER_PHI_DYN_COUNT_PORT"
 else
   LAUNCHER_DYN_SRV="$LAUNCHER_DYN_COUNT $LAUNCHER_DYN_COUNT_PORT"
 fi
 
-#if [ "$LAUNCHER_TSK_ID" == "0" ];then
+#if [[ "$LAUNCHER_TSK_ID" == "0" ]];then
 
-#  if [ "$LAUNCHER_ON_PHI" == "1" ];then
+#  if [[ "$LAUNCHER_ON_PHI" == "1" ]];then
 #    echo "--------------------------------------------------"
 #    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NPROCS processors allocated."
 #    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NJOBS total tasks to complete."
@@ -58,12 +58,12 @@ fi
 #---------------------------------
 # Setup initial JID for each task
 #---------------------------------
-if [ $LAUNCHER_SCHED == "interleaved" ]; then
+if [[ $LAUNCHER_SCHED == "interleaved" ]]; then
   # Setup stride for assigning serial tasks
   export LAUNCHER_JID=`expr $LAUNCHER_TSK_ID + 1`
-elif [ $LAUNCHER_SCHED == "block" ]; then
+elif [[ $LAUNCHER_SCHED == "block" ]]; then
   blocks=`expr $LAUNCHER_NJOBS / $LAUNCHER_NPROCS`
-  if [ `expr $blocks \* $LAUNCHER_NPROCS` -lt $LAUNCHER_NJOBS ]; then
+  if [[ `expr $blocks \* $LAUNCHER_NPROCS` -lt $LAUNCHER_NJOBS ]]; then
     blocks=`expr $blocks + 1`
   fi
   export LAUNCHER_JID=`expr $LAUNCHER_TSK_ID \* $blocks + 1`
@@ -71,15 +71,15 @@ elif [ $LAUNCHER_SCHED == "block" ]; then
 else
   # Grab the JID to run from The Count
   export LAUNCHER_JID=`$NETCAT_CMD $LAUNCHER_DYN_SRV`
-fi 
+fi
 
 COMPLETE="false"
 
 #Check to see if the job id is larger than the task id. If so, termine
 #BUGFIX for github issue #16 https://github.com/TACC/launcher/issues/16
-if [ ! "$LAUNCHER_JID" == "Done" ]
+if [[ ! "$LAUNCHER_JID" == "Done" ]]
 then
-  if [ $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]
+  if [[ $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]]
   then
     COMPLETE="overallocate"
   fi
@@ -88,8 +88,8 @@ else
 fi
 
 
-while [ $COMPLETE == "false" ]; do
-  if [ ! "x$LAUNCHER_JID" == "x" ]
+while [[ $COMPLETE == "false" ]]; do
+  if [[ ! "x$LAUNCHER_JID" == "x" ]]
   then
     export CMD=`grep -m $LAUNCHER_JID . $LAUNCHER_JOB_FILE | tail -n 1`
 
@@ -101,24 +101,24 @@ while [ $COMPLETE == "false" ]; do
     echo "Launcher: Job $LAUNCHER_JID completed in $EXEC_TIME seconds."
   fi
 
-  if [ $LAUNCHER_SCHED == "interleaved" ]; then
+  if [[ $LAUNCHER_SCHED == "interleaved" ]]; then
     export LAUNCHER_JID=`expr $LAUNCHER_JID + $LAUNCHER_NPROCS`
-    if [ "x$LAUNCHER_JID" == "x" -o $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]; then
+    if [[ "x$LAUNCHER_JID" == "x" -o $LAUNCHER_JID -gt $LAUNCHER_NJOBS ]]; then
       COMPLETE="true"
     fi
-  elif [ $LAUNCHER_SCHED == "block" ]; then
+  elif [[ $LAUNCHER_SCHED == "block" ]]; then
     export LAUNCHER_JID=`expr $LAUNCHER_JID + 1`
-    if [ $LAUNCHER_JID -ge $nextblock ]; then
+    if [[ $LAUNCHER_JID -ge $nextblock ]]; then
       COMPLETE="true"
     fi
   else
     RETRY=0
-    while [ $RETRY -lt 3 ]
+    while [[ $RETRY -lt 3 ]]
     do
       export LAUNCHER_JID=`$NETCAT_CMD $LAUNCHER_DYN_SRV`
-      if [ "x$LAUNCHER_JID" == "x" ]
+      if [[ "x$LAUNCHER_JID" == "x" ]]
       then
-        if [ $RETRY -lt 3 ]
+        if [[ $RETRY -lt 3 ]]
         then
           echo "WARNING: No response from dynamic task server. Retrying..."
           RETRY=`expr $RETRY + 1`
@@ -126,7 +126,7 @@ while [ $COMPLETE == "false" ]; do
           echo "ERROR: No response from dynamic task server after 3 retries. Exiting."
           exit
         fi
-      elif [ "$LAUNCHER_JID" == "Done" ]
+      elif [[ "$LAUNCHER_JID" == "Done" ]]
       then
         RETRY=4
         COMPLETE="true"
@@ -138,7 +138,7 @@ while [ $COMPLETE == "false" ]; do
 
 done
 
-if [ $COMPLETE == "true" ]
+if [[ $COMPLETE == "true" ]]
 then
   echo "Launcher: Task $LAUNCHER_TSK_ID done. Exiting."
 fi

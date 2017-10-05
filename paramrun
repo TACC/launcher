@@ -26,17 +26,17 @@ else
     windowsP=false
 fi
 
-if [ -z $LAUNCHER_DIR ]
+if [[ -z $LAUNCHER_DIR ]]
 then
   lwarn ERROR "Launcher base directory LAUNCHER_DIR not set. Exiting."
   lexit
 fi
 
 
-if [ "x$LAUNCHER_WORKDIR" == "x" ]
+if [[ "x$LAUNCHER_WORKDIR" == "x" ]]
 then
   #Check for older WORKDIR
-  if [ ! "x$WORKDIR" == "x" ]
+  if [[ ! "x$WORKDIR" == "x" ]]
   then
     lwarn NOTICE "WORKDIR variable has been depricated. Use LAUNCHER_WORKDIR."
     export LAUNCHER_WORKDIR=$WORKDIR
@@ -47,24 +47,24 @@ then
 fi
 
 #Step 0: Determine if resource manager integration is enabled
-if [ -z $LAUNCHER_PLUGIN_DIR ]
+if [[ -z $LAUNCHER_PLUGIN_DIR ]]
 then
   lwarn WARNING "LAUNCHER_PLUGIN_DIR not set. Defaulting to $LAUNCHER_DIR/plugins."
   LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
 fi
 
-if [ -z $LAUNCHER_RMI ]
+if [[ -z $LAUNCHER_RMI ]]
 then
   echo "Launcher: Starting without resource manager integration."
 else
-  if [ -f $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi ]
+  if [[ -f $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi ]]
   then
     source $LAUNCHER_PLUGIN_DIR/$LAUNCHER_RMI.rmi
     export LAUNCHER_HOSTFILE=$LAUNCHER_RMI_HOSTFILE
   else
     lwarn WARNING "Resource Manager Integration plugin file $LAUNCHER_RMI.rmi not found."
     lwarn "" "         Available options:"
-    for rmi in `ls $LAUNCHER_PLUGIN_DIR/*.rmi 2>/dev/null` 
+    for rmi in `ls $LAUNCHER_PLUGIN_DIR/*.rmi 2>/dev/null`
     do
       lwarn "" "           `basename $rmi .rmi`"
     done
@@ -73,13 +73,13 @@ else
 fi
 
 #Step 1: Ensure that LAUNCHER_HOSTFILE is set and valid
-if [ -z $LAUNCHER_HOSTFILE ]
+if [[ -z $LAUNCHER_HOSTFILE ]]
 then
   lwarn WARNING "LAUNCHER_HOSTFILE is not set. Defaulting to localhost."
   LAUNCHER_LOCALHOST=1
   export LAUNCHER_NHOSTS=1
 else
-  if [ ! -f $LAUNCHER_HOSTFILE ]
+  if [[ ! -f $LAUNCHER_HOSTFILE ]]
   then
     lwarn ERROR "Hostfile ($LAUNCHER_HOSTFILE) not found."
     lexit
@@ -87,9 +87,9 @@ else
 fi
 
 #Step 2: Ensure that necessary variables are set
-if [ -z $LAUNCHER_PPN ]
+if [[ -z $LAUNCHER_PPN ]]
 then
-  if [ ! -z $LAUNCHER_RMI_PPN ]
+  if [[ ! -z $LAUNCHER_RMI_PPN ]]
   then
     export LAUNCHER_PPN=$LAUNCHER_RMI_PPN
   else
@@ -98,9 +98,9 @@ then
   fi
 fi
 
-if [ -z $LAUNCHER_NHOSTS ]
+if [[ -z $LAUNCHER_NHOSTS ]]
 then
-  if [ ! -z $LAUNCHER_RMI_NHOSTS ]
+  if [[ ! -z $LAUNCHER_RMI_NHOSTS ]]
   then
     export LAUNCHER_NHOSTS=$LAUNCHER_RMI_NHOSTS
   else
@@ -111,29 +111,29 @@ fi
 
 export LAUNCHER_NPROCS=`expr $LAUNCHER_NHOSTS \* $LAUNCHER_PPN`
 
-if [ -z $LAUNCHER_NPROCS ]
+if [[ -z $LAUNCHER_NPROCS ]]
 then
   lwarn ERROR "LAUNCHER_NPROCS is not set."
   lexit
 fi
 
 #Backward Compatability with v2 and v1: Check for CONTROL_FILE
-if [ ! -z $CONTROL_FILE ]
+if [[ ! -z $CONTROL_FILE ]]
 then
   lwarn NOTICE "CONTROL_FILE variable depricated. Use LAUNCHER_JOB_FILE in the future."
   export LAUNCHER_JOB_FILE=$CONTROL_FILE
 fi
 
 #Step 3: Ensure that LAUNCHER_JOB_FILE exists
-if [ -z $LAUNCHER_JOB_FILE ]
+if [[ -z $LAUNCHER_JOB_FILE ]]
 then
   lwarn ERROR "LAUNCHER_JOB_FILE not set."
   lexit
 else
-  if [ -f $LAUNCHER_JOB_FILE ]
+  if [[ -f $LAUNCHER_JOB_FILE ]]
   then
     export LAUNCHER_NJOBS=`wc -l $LAUNCHER_JOB_FILE | awk '{print $1}'`
-    if [ $LAUNCHER_NJOBS -eq 0 ]
+    if [[ $LAUNCHER_NJOBS -eq 0 ]]
     then
       lwarn ERROR "LAUNCHER_JOB_FILE ($LAUNCHER_JOB_FILE) is empty. This could be caused if the file is DOS formatted."
       lwarn NOTICE "Consider using dos2unix on your file to convert the newline characters."
@@ -155,18 +155,18 @@ else
 fi
 
 #Step 5: Scheduling setup
-if [ "x$LAUNCHER_SCHED" == "x" ]
+if [[ "x$LAUNCHER_SCHED" == "x" ]]
 then
   export LAUNCHER_SCHED="dynamic"
 fi
 
-if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
+if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
   #Start tskserver
   RUNNING="false"
   RETRY=0
-  while [ $RUNNING == "false" ]
+  while [[ "$RUNNING" == "false" ]]
   do
-    if [ $windowsP==true ]; then
+    if [[ "$windowsP" == "true" ]]; then
         $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS localhost 9471 2>/dev/null &
         LAUNCHER_DYN_PID=$!
         disown $LAUNCHER_DYN_PID
@@ -175,16 +175,16 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
         $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME 9471 2>/dev/null &
         LAUNCHER_DYN_PID=$!
         disown $LAUNCHER_DYN_PID
-        sleep 1s  
+        sleep 1s
     fi
     if ! ps -p $! >/dev/null 2>/dev/null
     then
-      if [ $RETRY -ne 10 ]
+      if [[ $RETRY -ne 10 ]]
       then
         lwarn WARNING "Unable to start dynamic task service. Retrying..."
         RETRY=`expr $RETRY + 1`
         sleep 10s
-      else 
+      else
         lwarn ERROR "Unable to start dynamic task service. Shutting down."
         lexit
       fi
@@ -194,15 +194,15 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   done
 
 
-  if [ $windowsP==true ]; then
+  if [[ "$windowsP" == "true" ]]; then
        export LAUNCHER_DYN_COUNT=localhost
   else
       export LAUNCHER_DYN_COUNT="$HOSTNAME"
   fi
   export LAUNCHER_DYN_COUNT_PORT=9471
 
-  if [ $LAUNCHER_USE_PHI -ne "0" ]; then
-    if [ $windowsP==true ]; then
+  if [[ $LAUNCHER_USE_PHI -ne "0" ]]; then
+    if [[ $windowsP==true ]]; then
 	#Start another tskserver for the Intel Xeon Phi cards
         $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` localhost 9472 2>/dev/null &
         LAUNCHER_PHI_DYN_PID=$1
@@ -220,19 +220,19 @@ if [ "$LAUNCHER_SCHED" == "dynamic" ]; then
   fi
 fi
 
-if [ "$LAUNCHER_BIND" == "1" ]
+if [[ "$LAUNCHER_BIND" == "1" ]]
 then
   num_socks=$(lstopo-no-graphics --only socket | wc -l | awk '{print $1}')
-  if [ $num_socks -eq 0 ]
+  if [[ $num_socks -eq 0 ]]
   then
     num_socks=1
   fi
   num_cores=$(lstopo-no-graphics --only core | wc -l | awk '{print $1}')
   num_threads=$(lstopo-no-graphics --only pu | wc -l | awk '{print $1}')
-  if [ $LAUNCHER_PPN -gt $num_cores ]
+  if [[ $LAUNCHER_PPN -gt $num_cores ]]
   then
     export LAUNCHER_BIND_HT=1
-    if [ $LAUNCHER_PPN -gt $num_threads ]
+    if [[ $LAUNCHER_PPN -gt $num_threads ]]
     then
       lwarn WARNING "Requested Processes per Node ($LAUNCHER_PPN) exceeds number of available threads ($num_threads). Resetting..."
       export LAUNCHER_PPN=$num_threads
@@ -260,7 +260,7 @@ echo "   Processes per host: $LAUNCHER_PPN"
 echo "   Total processes:    $LAUNCHER_NPROCS"
 echo "   Total jobs:         $LAUNCHER_NJOBS"
 echo "   Scheduling method:  $LAUNCHER_SCHED"
-if [ "$LAUNCHER_BIND" == "1" ]
+if [[ "$LAUNCHER_BIND" == "1" ]]
 then
   echo
   echo "------ Process Binding Enabled ------"
@@ -268,7 +268,7 @@ then
   echo "   Cores per host:     $num_cores"
   echo "   Threads per host:   $num_threads"
   echo -n "   Binding each task to $LAUNCHER_PUPT "
-  if [ "$LAUNCHER_BIND_HT" == "1" ]
+  if [[ "$LAUNCHER_BIND_HT" == "1" ]]
   then
     echo "threads (Hyperthreads in use)"
   else
@@ -277,7 +277,7 @@ then
 fi
 
 
-if [ "$LAUNCHER_USE_PHI" == "1" ]
+if [[ "$LAUNCHER_USE_PHI" == "1" ]]
 then
   echo
   echo "--- Intel Xeon Phi Support Enabled ---"
@@ -289,7 +289,7 @@ echo "-------------------------------------"
 echo "Launcher: Starting parallel tasks..."
 
 i=0
-if [ "x$LAUNCHER_LOCALHOST" == "x1" ]
+if [[ "x$LAUNCHER_LOCALHOST" == "x1" ]]
 then
   env LAUNCHER_HOST_ID=0 $LAUNCHER_DIR/init_launcher
 else
@@ -305,19 +305,19 @@ res=$?
 
 
 #Cleanup processes and files
-if [ ! "x$LAUNCHER_DYN_PID" == "x" ]
+if [[ ! "x$LAUNCHER_DYN_PID" == "x" ]]
 then
   kill $LAUNCHER_DYN_PID
 fi
 
-if [ ! "x$LAUNCHER_PHI_DYN" == "x" ]
+if [[ ! "x$LAUNCHER_PHI_DYN" == "x" ]]
 then
   kill $LAUNCHER_PHI_DYN_PID
 fi
 
 rm -f $LAUNCHER_RMI_HOSTFILE
 
-if [ $res -ne 0 ]; then
+if [[ $res -ne 0 ]]; then
   echo "Launcher: Done. Job exited with code: $res"
 else
   echo "Launcher: Done. Job exited without errors"

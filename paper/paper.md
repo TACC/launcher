@@ -37,9 +37,10 @@ will perform automatic process binding on multi-/many-core architectures where h
 # Use Cases
 Launcher is commonly used in situations where search or analysis of a large data space on independent points is required. 
 Launcher is frequently used for:
+
 * Sequence alignment scoring for many hundreds or thousands of DNA/RNA sequence pairs
 * Docking/scoring (protien/ligand dock scoring, drug/immunotherapy development, etc.)
-* Immune repetoire analysis
+* Immune repertoire analysis
 * Statistical analysis on unknown variables
 
 # Workflow

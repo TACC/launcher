@@ -1,5 +1,14 @@
 #!/bin/bash
 
+function auto-retry()
+{
+    let backoff=1
+    false
+    while [ $? -ne 0 ]; do
+        "$@" || (sleep $((backoff*=2));false)
+    done
+}
+
 function lwarn {
   if [ "x$LAUNCHER_LOGFILE" == "x" -o "$LAUNCHER_LOGFILE" == "stderr" ]
   then
@@ -293,9 +302,11 @@ if [ "x$LAUNCHER_LOCALHOST" == "x1" ]
 then
   env LAUNCHER_HOST_ID=0 $LAUNCHER_DIR/init_launcher
 else
+  echo "using $LAUNCHER_HOSTFILE to get hosts" >&2
   for host in `cat $LAUNCHER_HOSTFILE`
   do
-    ssh $host "cd $LAUNCHER_WORKDIR; env `$LAUNCHER_DIR/pass_env` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" &
+    echo "starting job on $host" >&2
+    ( auto-retry ssh $host "cd $LAUNCHER_WORKDIR; env `$LAUNCHER_DIR/pass_env` LAUNCHER_NHOSTS=$np LAUNCHER_HOST_ID=$i $LAUNCHER_DIR/init_launcher" ) &
     i=`expr $i + 1`
   done
   wait

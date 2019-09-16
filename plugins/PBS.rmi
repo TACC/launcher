@@ -1,0 +1,17 @@
+#Launcher Resource Manger Integration (RMI) file for PBS/Torque
+#Chris Blanton 8/6/2019
+#Kevin Manalo 9/11/2019
+
+# Create a hostfile and set LAUNCHER_RMI_HOSTFILE
+export LAUNCHER_RMI_HOSTFILE=`mktemp -t launcher.$PBS_JOBID.XXXXXXXX`
+echo $LAUNCHER_RMI_HOSTFILE
+
+# Populate the hostfile
+cat $PBS_NODEFILE > $LAUNCHER_RMI_HOSTFILE
+
+# Set the number of processes per node
+export LAUNCHER_RMI_PPN=$(uniq -c $PBS_NODEFILE | awk '{print $1}' | uniq)
+
+# Set the number of hosts
+export LAUNCHER_RMI_NHOSTS=$(sort $PBS_NODEFILE | uniq | wc -l)
+

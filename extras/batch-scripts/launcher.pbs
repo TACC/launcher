@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Simple PBS script for submitting multiple serial
+# jobs (e.g. parametric studies) using a script wrapper
+# to launch the jobs.
+#
+# To use, build the launcher executable and your
+# serial application(s) and place them in your WORKDIR
+# directory.  Then, edit the CONTROL_FILE to specify 
+# each executable per process.
+#-------------------------------------------------------
+#-------------------------------------------------------
+# 
+#         <------ Setup Parameters ------>
+#
+#PBS -N Parametric_study
+#PBS -l nodes=1:ppn=16
+#PBS -o Parametric.o$PBS_O_JOBID
+#PBS -l walltime=00:05:00
+#
+#        <--------Queue Parameters------->
+#                 If needed. 
+#PBS -q yourqueuename 
+#------------------------------------------------------
+
+export LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
+export LAUNCHER_RMI=PBS
+export LAUNCHER_JOB_FILE=jobfile
+ 
+$LAUNCHER_DIR/paramrun
+
+# Guard line to prevent potential issues due to submitfilter issues. 
+

@@ -67,6 +67,7 @@ Copy the example job submission script `launcher.<sched>` to your working direct
 The directory containing this README contains several example submission scripts:
   * SGE:   launcher.sge
   * SLURM: launcher.slurm
+  * PBS:   launcher.pbs
 
 ## Referencing Launcher
 If you are using Launcher, please remember to make a reference to it when publishing results. The file `paper/paper.bib` contains the BibTeX-formatted citation list. Please reference entry `Wilson:2014:LSF:2616498.2616533` (i.e., in LaTeX: `\cite{Wilson:2014:LSF:2616498.2616534}`).

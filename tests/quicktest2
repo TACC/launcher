@@ -1,13 +1,16 @@
 #!/bin/bash
 
-if [ "x$1" == "x" ]
-then
-  export LAUNCHER_DIR=../
-else
-  export LAUNCHER_DIR=$1
+# Usually the launcher directory is defined in the LAUNCHER_DIR env. var.
+
+                   # If command line argument exists, use it as the launcher directory.
+[[ ! -z "$1" ]] && export LAUNCHER_DIR=$1
+
+                   # if LAUNCHER_DIR is not defined, use one directory above
+if [[ -z "$LAUNCHER_DIR" ]]; then
+    export LAUNCHER_DIR=../
 fi
 
-export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/extras/examples/helloworldshort
+export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/extras/examples/helloworld_short
 export LAUNCHER_SCHED=block
 export LAUNCHER_WORKDIR=`pwd`
 

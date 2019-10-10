@@ -1,8 +1,0 @@
-language: bash
-
-os:
-  - linux
-  - osx
-
-script:
-    - bash .travis_test_file

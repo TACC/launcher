@@ -7,7 +7,13 @@ export LAUNCHER_RMI_HOSTFILE=`mktemp -t launcher.$SLURM_JOB_ID.hostlist.XXXXXXXX
 scontrol show hostname $SLURM_NODELIST > $LAUNCHER_RMI_HOSTFILE
 
 #Set the number of processes per node
-export LAUNCHER_RMI_PPN=`echo $SLURM_TASKS_PER_NODE | awk -F '(' '{print $1}'`
+#export LAUNCHER_RMI_PPN=`echo $SLURM_TASKS_PER_NODE | awk -F '[,(]' '{print $1}'`
 
 #Set the number of hosts
 export LAUNCHER_RMI_NHOSTS=$SLURM_NNODES
+
+#Set the number of procs (tasks in all)
+export LAUNCHER_NPROCS=$SLURM_NPROCS                                     
+
+#Set the number of processes per node
+export LAUNCHER_RMI_PPN=$(($SLURM_NPROCS / $SLURM_NNODES))

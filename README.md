@@ -2,92 +2,26 @@
 [![Build Status](https://travis-ci.org/marshalllerner/launcher.svg?branch=master)](https://travis-ci.org/marshalllerner/launcher)
 [![status](http://joss.theoj.org/papers/7b5df63cd8a40f557d66051695d300a7/status.svg)](http://joss.theoj.org/papers/7b5df63cd8a40f557d66051695d300a7)
 
-Launcher is a utility for performing simple, data parallel, high throughput computing (HTC) workflows on clusters, 
-massively parallel processor (MPP) systems, workgroups of computers, and personal machines.
+Launcher is a utility for performing simple, data parallel, high throughput computing (HTC) workflows on clusters, massively parallel processor (MPP) systems, workgroups of computers, and personal machines.
 
-## Installing Launcher in User Space
-Launcher does not need to be compiled. 
-Unpack the tarball or clone the repository in your $HOME directory (or another convenient directory). 
-Then, set `LAUNCHER_DIR` to point to that directory (usually: `export LAUNCHER_DIR=$HOME/launcher`).
-`Python 2.7` or greater and `hwloc` are required for full functionality. 
-See INSTALL file for more information.
+## Installing Launcher
+Launcher does not need to be compiled. Unpack the tarball or clone the repository in the desired directory. Then, set `LAUNCHER_DIR` to point to that location. Python 2.7 or greater and hwloc are required for full functionality. See INSTALL for more information.
 
 ## Verifying Installation
 
-## Quickstart Batch
-Obtain a `commands` file and a batch job script with the launcher command to set up and run an initial test.
-For systems with `modules` (Software Mananagement System), load the launcher modulefile:
+Included in the download is a file called "quickstart" found in the folder "tests". In order to verify installation, open the command line and find the launcher file, and then type "cd tests" and then press the enter key. If the quickstart file is in the correct place, there is no need for arguments, so type "./quickstart". However, if the Launcher directory is found somewhere else, type "./quickstart <Launcher directory>". The script will run in the terminal and if there are no errors in the process, the last line will say "Launcher: Done. Job exited without errors".
 
-```shell
-       module load launcher                #Sites with modules and launcher installed
-```
-   
-or, for a User-Space installed `launcher` set `LAUNCHER_DIR` to its top-level directory 
-   
-```shell
-       export LAUNCHER_DIR=$HOME/launcher  #For user-installed launcher in $HOME dir.
-```
-   
-Create a directory in your `HOME` directory to run a launcher test, and `cd` into it;
-   
-```shell
-       cd; mkdir launcher_test; cd launcher_test
-```
-   
-Copy a SLURM job script and a job file (list of execution commands) into this directory:
-   
-```shell
-       cp $LAUNCHER_DIR/extras/examples/helloworldshort             commands
-       cp $LAUNCHER_DIR/extras/batch-scripts/job_script_test.slurm  job
-```
+## Quickstart
 
-Submit the job script. 
-(You may need to supply an account for the `#SBATCH -A` option in the script.)
-(If compute nodes have less than 16 cores, you may need to reduce the `#SBATCH -n` value.)
-The `$LAUNCHER_DIR/paramrun` line in the job script will execute the commands in the `commands` file.
+* Set `LAUNCHER_JOB_FILE` to point to your job file. Example job files are provided in extras/examples.
+* Be sure that `LAUNCHER_DIR` is set to the directory containing the launcher source files (user-installed ONLY. Not required if using system installed version of launcher).
+* From the command-line or within your jobscript, run:`$LAUNCHER_DIR/paramrun`
 
-```shell
-       sbatch job
-```
-
-results will be written to the job output file (`launcher_test.o`...) in the present directory.
-Modify the `commands` and `job` files for your own work plan.  There are many other features
-available for more complex workflow executions. 
-
-## Quickstart Interactive
-Execute all the above commands for the Qucikstart Batch section above, stopping
-after executing  cp to obtain the commands file.
-
-Copy the quicktest commands to the present directory:
-
-```shell
-       cp $LAUNCHER_DIR/extras/tests/quicktest*  .
-```
-
-Interactively obtain a compute node (in SLURM).  
-At TACC, execute the idev command, and wait for a compute node prompt.
-For non-TACC sites, see site instructions for node access through `srun` (for SLURM).
-
-```shell
-       idev   # at TACC
-       srun ... #at non-TACC sites
-```
-
-Once you are on a compute node interactively, execute the `quicktest` (or `quicktest2`) command.
-
-```shell
-       ./quicktest
-```
-
-Output will be displayed to the terminal window.
-Modify the `commands` file for your own work plan.  There are many other features
-available for more complex workflow executions. 
-
-## Environment Variables
+## Available Environment Variables
 
 You should set the following environment variables:
 
-* `$LAUNCHER_JOB_FILE` is the file containing the "jobs" (commands) to run in your parametric submission.
+* `$LAUNCHER_JOB_FILE` is the file containing the jobs to run in your parametric submission.
 * `$LAUNCHER_WORKDIR` is the directory where the launcher will execute. All relative paths will resolve to this directory.
 
 The launcher defines the following environment variables for each job that is started:
@@ -107,25 +41,32 @@ Note: you can also use the launcher to run a sequence of serial jobs when you ha
 
 ## Task Scheduling Behavior
 
-The launcher has three scheduling methods, available by setting the environment variable `$LAUNCHER_SCHED`: (descriptions below assume k = task, p = num. procs, n = num. jobs)
+The launcher has three available behaviors for scheduling jobs, available by setting the environment variable `$LAUNCHER_SCHED`: (descriptions below assume k = task, p = num. procs, n = num. jobs)
 
-* dynamic (default) - task k executes first available unclaimed line
-* interleaved - task k executes lines k, k+p, k+p*2, k+p*3, etc.
-* block - task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
+* dynamic (default) - each task k executes first available unclaimed line
+* interleaved - each task k executes every (k+p)th line
+* block - each task k executes lines [ k(n/p)+1, (k+1)(n/p) ]
 
 ## Using Launcher on Multi-/Many-core Processors
 Launcher uses the hwloc utility to determine layout of cores on the node. If hwloc is installed on your system and the commands are in the default `PATH`, Launcher will use this to partition the cores on node between the tasks. You can enable task binding by setting `LAUNCHER_BIND=1` before calling `paramrun`.
 
+## Using Launcher with Intel Xeon Phi (KNC) Co-processor Cards
+
+Launcher has the ability to execute appropriately compiled executables natively on first generation Intel Xeon Phi (KNC) cards.
+
+Available Environment Variables for Intel Xeon Phi execution:
+
+* `$LAUNCHER_NPHI` is the number of Intel Xeon Phi cards per node. This is set to zero (0) by default. Acceptable values are '1' and '2'.
+* `$LAUNCHER_PHI_PPN` is the number of processes per Intel Xeon Phi card.
+* `$LAUNCHER_PHI_JOB_FILE` is the file containing the jobs to run on the Intel Xeon Phi cards.
+
 ## Job Submission
 
-Copy the example job submission script `job_script.<sched>` to your working directory to use as a starting point for interfacing with the desired batch system.
-The `commands` file contains the list of execution (commands) to run, one per line.
+Copy the example job submission script `launcher.<sched>` to your working directory to use as a starting point for interfacing with the desired batch system. Note that this script provides some simple error checking prior to the actual submission to aid in diagnosing missing executables and misconfiguration.
 
-In the `extras/batch-scripts`  directory there are example submission scripts:
+The launcher/extras/batch-scripts directory contains several example submission scripts:
   * SGE:   launcher.sge
   * SLURM: launcher.slurm
-  * PBS:   launcher.pbs
 
-## Reference
-The file `paper/paper.bib` contains the BibTeX-formatted citation list. 
-Reference entry `Wilson:2014:LSF:2616498.2616533` (i.e., in LaTeX: `\cite{Wilson:2014:LSF:2616498.2616534}`).
+## Referencing Launcher
+If you are using Launcher, please remember to make a reference to it when publishing results. The file `paper/paper.bib` contains the BibTeX-formatted citation list. Please reference entry `Wilson:2014:LSF:2616498.2616533` (i.e., in LaTeX: `\cite{Wilson:2014:LSF:2616498.2616534}`).

@@ -1,0 +1,57 @@
+Oct 10, 2019
+Si Liu
+Clean up and synchronize with the github after all changes
+
+
+Oct 10, 2019
+Si Liu
+Clean up and merge all pull request
+
+--Merge pull request #54 from milfeld/master
+--New README.md and quicktest updates
+
+---Merge pull request #53 from chrisblanton/master 
+---Adding PBS support
+
+--Merge pull request #52 from computational-neuroimaging-lab/master
+--added auto retry to ssh to recover from pamd errors
+
+
+
+Jun 6, 2019
+Si Liu
+Update for Frontera now
+
+
+
+Mar 29, 2019
+Si Liu
+Final work for merging and clean up
+
+
+
+Mar 24, 2019
+Si Liu
+Adding more examples for multiple-redirectiron output
+
+
+
+Mar 24, 2019
+Si Liu
+Merge Stampede2, Lonestar5, and Hikari versions together
+Version 3.4 now
+
+
+
+Mar 10, 2019
+Si Liu
+Dr. Richard Cameron Craddock suggested the followign changes for:
+added auto retry to ssh to recover from pamd errors 
+More details can be found here:
+https://github.com/TACC/launcher/pull/52
+
+
+
+Mar 7, 2019
+Si Liu
+More bugs fixed

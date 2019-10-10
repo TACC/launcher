@@ -1,8 +1,10 @@
 #!/bin/bash
+
 #------------------------------------------------
 # On MIC setup script to run multiple tasks/MIC
 #
-# 11/27/2012 - l.wilson
+# 03/29/2019 - Si Liu
+# 11/27/2012 - Luke Wilson
 #
 # Texas Advanced Computing Center
 # The University of Texas at Austin

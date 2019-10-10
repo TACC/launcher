@@ -1,8 +1,11 @@
 #!/bin/bash
+
 #------------------------------------------------
 # On host setup script to run multiple tasks/host
 #
-# 1/21/2011 - l.wilson
+# 06/06/2019 - Si Liu 
+# 03/29/2019 - Si Liu
+# 01/21/2011 - Luke Wilson
 #
 # Texas Advanced Computing Center
 # The University of Texas at Austin
@@ -31,7 +34,6 @@ else
     env `$LAUNCHER_DIR/pass_env` LAUNCHER_TSK_ID=$(($LAUNCHER_PPN * $LAUNCHER_HOST_ID + $i)) $LAUNCHER_DIR/launcher &
   done
 fi
-
 
 if [ ! "x$LAUNCHER_NPHI" == "x" ]
 then

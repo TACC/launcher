@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #EXCLUDE is a list of patterns that should be removed from the environment before passing to launcher tasks on remote hosts
-EXCLUDE="BASH_FUNC ModuleTable LS_ LESS SSH_ PE_MPICH MINICOM SLURM_NODELIST"
+EXCLUDE="BASH_FUNC ModuleTable LS_ LESS SSH_ PE_MPICH MINICOM SLURM_NODELIST SLURM_JOB_NODELIST PS1 PROMPT_"
 
 GREP_ARGS=`
   for prefix in $EXCLUDE

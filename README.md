@@ -124,6 +124,7 @@ The `commands` file contains the list of execution (commands) to run, one per li
 In the `extras/batch-scripts`  directory there are example submission scripts:
   * SGE:   launcher.sge
   * SLURM: launcher.slurm
+  * PBS:   launcher.pbs
 
 ## Reference
 The file `paper/paper.bib` contains the BibTeX-formatted citation list. 

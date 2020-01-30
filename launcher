@@ -16,6 +16,8 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
+sleep $[ ( $RANDOM % 30 )  + 1 ]s
+
 NETCAT_CMD="nc ${LAUNCHER_NETCAT_FLAGS}"
 
 if [[ "x$LAUNCHER_JOB_FILE" == "x" ]]

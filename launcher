@@ -2,6 +2,10 @@
 #------------------------------------------------
 # Simple serial job launcher for TACC systems
 #
+# 01/31/2020 Si Liu
+# Clean up
+# Release 3.6 version now
+#
 # 03/29/2019 Si Liu
 # Merge all versions together
 # Generate the new 3.5 verision now
@@ -16,7 +20,7 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
-sleep $[ ( $RANDOM % 30 )  + 1 ]s
+sleep $[ ( $RANDOM % 24 )  + 1 ]s
 
 NETCAT_CMD="nc ${LAUNCHER_NETCAT_FLAGS}"
 
@@ -42,28 +46,10 @@ else
   LAUNCHER_DYN_SRV="$LAUNCHER_DYN_COUNT $LAUNCHER_DYN_COUNT_PORT"
 fi
 
-#if [[ "$LAUNCHER_TSK_ID" == "0" ]];then
-
-#  if [[ "$LAUNCHER_ON_PHI" == "1" ]];then
-#    echo "--------------------------------------------------"
-#    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NPROCS processors allocated."
-#    echo "Launcher (on Intel Xeon Phi) -> $LAUNCHER_NJOBS total tasks to complete."
-#    echo "--------------------------------------------------"
-#    echo " "
-#  else
-#    echo "--------------------------------------------------"
-#    echo "Launcher -> $LAUNCHER_NPROCS processors allocated."
-#    echo "Launcher -> $LAUNCHER_NJOBS total tasks to complete."
-#    echo "--------------------------------------------------"
-#    echo " "
-#  fi
-#else
-#    sleep 0.5
-#fi
-
 #---------------------------------
 # Setup initial JID for each task
 #---------------------------------
+
 if [[ $LAUNCHER_SCHED == "interleaved" ]]; then
   # Setup stride for assigning serial tasks
   export LAUNCHER_JID=`expr $LAUNCHER_TSK_ID + 1`
@@ -93,9 +79,7 @@ else
   COMPLETE="overallocate"
 fi
 
-
 while [[ $COMPLETE == "false" ]]; do
-
   if [[ ! "x$LAUNCHER_JID" == "x" ]]
   then
     export CMD=`grep -m $LAUNCHER_JID . $LAUNCHER_JOB_FILE | tail -n 1`
@@ -129,6 +113,7 @@ while [[ $COMPLETE == "false" ]]; do
         then
           echo "WARNING: No response from dynamic task server. Retrying..."
           RETRY=`expr $RETRY + 1`
+	  sleep 3s
         else
           echo "ERROR: No response from dynamic task server after 3 retries. Exiting."
           exit

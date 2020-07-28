@@ -10,7 +10,7 @@ if [[ -z "$LAUNCHER_DIR" ]]; then
     export LAUNCHER_DIR=../
 fi
 
-export LAUNCHER_JOB_FILE=commands
+export LAUNCHER_JOB_FILE=default_work_file
 export LAUNCHER_SCHED=interleaved
 export LAUNCHER_WORKDIR=`pwd`
 

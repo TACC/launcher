@@ -10,4 +10,4 @@ GREP_ARGS=`
   done
 `
 
-env | grep -v -e "}$" -e "^ " -e "=$" -e "^_" -e "(" $GREP_ARGS | grep -v -e " " | tr '\n' ' '
+env | grep -v -e "}$" -e "^ " -e "=$" -e "^_" -e "(" -e ")" $GREP_ARGS | grep -v -e " " | tr '\n' ' '

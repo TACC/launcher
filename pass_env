@@ -1,15 +1,14 @@
 #!/bin/bash
 
 #EXCLUDE is a list of patterns that should be removed from the environment before passing to launcher tasks on remote hosts
-EXCLUDE="BASH_FUNC ModuleTable LS_ LESS SSH_ PE_MPICH MINICOM SLURM_NODELIST SLURM_JOB_NODELIST PS1 PROMPT_"
+EXCLUDE="ABCOPQXYZ BASH_ENV BASH_FUNC ModuleTable LS_ LESS SSH_ PE_MPICH MINICOM SLURM_NODELIST SLURM_JOB_NODELIST PS1 PROMPT_"
 
 unset TERMCAP
 
 GREP_ARGS=`
   for prefix in $EXCLUDE
   do
-    echo -n "-e ^$prefix "
+    echo -n " -e ^$prefix "
   done
 `
-
 env | grep -v -e "}$" -e "^ " -e "=$" -e "^_" -e "(" $GREP_ARGS | grep -v -e " " | tr '\n' ' '

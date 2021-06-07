@@ -2,6 +2,10 @@
 #------------------------------------------------
 # Simple serial job launcher for TACC systems
 #
+# 06/04/2021 Si Liu
+# Term fix for CSR
+# Release 3.8 version
+#
 # 07/13/2020 Si Liu
 # Documentation and exmaples update
 # Release 3.7 version

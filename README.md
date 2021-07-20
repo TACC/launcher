@@ -33,7 +33,7 @@ The launcher defines the following environment variables for each job that is st
 * `$LAUNCHER_TSK_ID` is the particular processing core that the job is running on, from 0 to `$LAUNCHER_NPROCS-1`.
 * `$LAUNCHER_JID` represents the particular job instance currently running. `$LAUNCHER_JID` is numbered from 1 to `$LAUNCHER_NJOBS`.
 
-Example: If you want to redirect stdout to a file containing the unique ID of each line, you can specify the following in the paramlist file: ```a.out > out.o$LAUNCHER_JID```
+Example: If you want to redirect stdout to a file containing the unique ID of each line, you can specify the following in the job file: ```a.out > out.o$LAUNCHER_JID```
 
 If this particular execution instance of a.out was the first line in the job file, the output would be placed in the file "out.o1".
 

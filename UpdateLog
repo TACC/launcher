@@ -1,3 +1,11 @@
+Aug 1, 2021
+Si Liu
+Fix the README file (paramrun file - job file)
+Reduce the sleep time a litte bit
+Fix the module issues
+
+
+
 June 4, 2021
 Si Liu
 Fix the TERM and TERMCAP issues reported by CSR

@@ -28,7 +28,7 @@
 # The University of Texas at Austin
 #------------------------------------------------
 
-sleep $[ ( $RANDOM % 24 )  + 1 ]s
+sleep $[ ( $RANDOM % 9 )  + 1 ]s
 
 NETCAT_CMD="nc ${LAUNCHER_NETCAT_FLAGS}"
 

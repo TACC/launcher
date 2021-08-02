@@ -192,7 +192,7 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
       then
         lwarn WARNING "Unable to start dynamic task service. Retrying..."
         RETRY=`expr $RETRY + 1`
-        sleep 6s
+        sleep 3s
       else
         lwarn ERROR "Unable to start dynamic task service. Shutting down."
         lexit

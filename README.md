@@ -9,7 +9,7 @@ Launcher does not need to be compiled. Unpack the tarball or clone the repositor
 
 ## Verifying Installation
 
-Included in the download is a file called "quickstart" found in the folder "tests". In order to verify installation, open the command line and find the launcher file, and then type "cd tests" and then press the enter key. If the quickstart file is in the correct place, there is no need for arguments, so type "./quickstart". However, if the Launcher directory is found somewhere else, type "./quickstart <Launcher directory>". The script will run in the terminal and if there are no errors in the process, the last line will say "Launcher: Done. Job exited without errors".
+Included in the download is a file called "quicktest" found in the folder "tests". In order to verify installation, open the command line and find the launcher file, and then type "cd tests" and then press the enter key. If the quicktest file is in the correct place, there is no need for arguments, so type "./quicktest". However, if the Launcher directory is found somewhere else, type "./quicktest <Launcher directory>". The script will run in the terminal and if there are no errors in the process, the last line will say "Launcher: Done. Job exited without errors".
 
 ## Quickstart
 

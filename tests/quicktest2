@@ -10,7 +10,7 @@ if [[ -z "$LAUNCHER_DIR" ]]; then
     export LAUNCHER_DIR=../
 fi
 
-export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/extras/examples/helloworld_short
+export LAUNCHER_JOB_FILE=$LAUNCHER_DIR/extras/examples/helloworld_multi_output
 export LAUNCHER_SCHED=block
 export LAUNCHER_WORKDIR=`pwd`
 

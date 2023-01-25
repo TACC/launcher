@@ -174,13 +174,14 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
   RETRY=0
   while [[ "$RUNNING" == "false" ]]
   do
+    let TSKPORT=9471+RETRY
     if [[ "$windowsP" == "true" ]]; then
-        $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS localhost 9471 2>/dev/null &
+        $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS localhost $TSKPORT 2>/dev/null &
         LAUNCHER_DYN_PID=$!
         disown $LAUNCHER_DYN_PID
         sleep 1s
     else
-        $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME 9471 2>/dev/null &
+        $LAUNCHER_DIR/tskserver $LAUNCHER_NJOBS $HOSTNAME $TSKPORT 2>/dev/null &
         LAUNCHER_DYN_PID=$!
         disown $LAUNCHER_DYN_PID
         sleep 1s
@@ -190,7 +191,7 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
     then
       if [[ $RETRY -ne 10 ]]
       then
-        lwarn WARNING "Unable to start dynamic task service. Retrying..."
+        lwarn WARNING "Unable to start dynamic task service on port $TSKPORT. Retrying..."
         RETRY=`expr $RETRY + 1`
         sleep 3s
       else
@@ -198,6 +199,7 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
         lexit
       fi
     else
+      lwarn NOTE "Started dynamic task service on port $TSKPORT."
       RUNNING="true"
     fi
   done
@@ -207,23 +209,24 @@ if [[ "$LAUNCHER_SCHED" == "dynamic" ]]; then
   else
       export LAUNCHER_DYN_COUNT="$HOSTNAME"
   fi
-  export LAUNCHER_DYN_COUNT_PORT=9471
+  export LAUNCHER_DYN_COUNT_PORT=$TSKPORT
 
   if [[ $LAUNCHER_USE_PHI -ne "0" ]]; then
+    let TSKPORT=TSKPORT+1
     if [[ $windowsP==true ]]; then
 	#Start another tskserver for the Intel Xeon Phi cards
-        $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` localhost 9472 2>/dev/null &
+        $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` localhost $TSKPORT 2>/dev/null &
         LAUNCHER_PHI_DYN_PID=$1
         disown $LAUNCHER_PHI_DYN_PID
         export LAUNCHER_PHI_DYN_COUNT=localhost
-        export LAUNCHER_PHI_DYN_COUNT_PORT=9472
+        export LAUNCHER_PHI_DYN_COUNT_PORT=$TSKPORT
     else
 	#Start another tskserver for the Intel Xeon Phi cards
-        $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME 9472 2>/dev/null &
+        $LAUNCHER_DIR/tskserver `wc -l $PHI_WORKDIR/$PHI_CONTROL_FILE` $HOSTNAME $TSKPORT 2>/dev/null &
         LAUNCHER_PHI_DYN_PID=$1
         disown $LAUNCHER_PHI_DYN_PID
         export LAUNCHER_PHI_DYN_COUNT="$HOSTNAME"
-        export LAUNCHER_PHI_DYN_COUNT_PORT=9472
+        export LAUNCHER_PHI_DYN_COUNT_PORT=$TSKPORT
     fi
   fi
 fi

@@ -43,7 +43,7 @@ then
   fi
 fi
 
-if [[ "x$LAUNCHER_JNOBS" == "x" ]]
+if [[ "x$LAUNCHER_NJOBS" == "x" ]]
 then
   export LAUNCHER_NJOBS=`cat $LAUNCHER_JOB_FILE | wc -l`
 fi
